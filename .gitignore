@@ -1,0 +1,12 @@
+# dependencies (none currently — kept for future tooling)
+node_modules/
+
+# test/build artifacts
+*.png
+*.log
+
+# OS / editor cruft
+.DS_Store
+*.swp
+.idea/
+.vscode/

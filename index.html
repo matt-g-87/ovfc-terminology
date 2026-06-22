@@ -1,0 +1,887 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>OVFC Terminology Trainer</title>
+<style>
+  :root{
+    --bg:#0f1720; --panel:#16212e; --panel2:#1d2b3a; --ink:#eef4fb; --muted:#9fb2c6;
+    --line:#2a3a4d; --red:#e23b3b; --blue:#2f6fe0; --good:#26c281; --bad:#f0a32a;
+    --accent:#39b0ff;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    background:var(--bg); color:var(--ink);
+    font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    -webkit-text-size-adjust:100%;
+  }
+  .app{display:flex;flex-direction:column;height:100dvh;height:100vh}
+  header{
+    display:flex;align-items:center;gap:10px;padding:10px 14px;
+    background:linear-gradient(90deg,#13202e,#172b3f);border-bottom:1px solid var(--line);
+    flex:0 0 auto;
+  }
+  header .logo{width:26px;height:26px;border-radius:6px;background:radial-gradient(circle at 30% 30%,#fff,#cfe);position:relative;flex:0 0 auto}
+  header .logo::after{content:"";position:absolute;inset:5px;border-radius:50%;
+    background:
+      radial-gradient(circle at 50% 50%,#111 2.4px,transparent 2.5px),
+      radial-gradient(circle at 18% 30%,#111 1.6px,transparent 1.7px),
+      radial-gradient(circle at 82% 30%,#111 1.6px,transparent 1.7px),
+      radial-gradient(circle at 24% 78%,#111 1.6px,transparent 1.7px),
+      radial-gradient(circle at 76% 78%,#111 1.6px,transparent 1.7px);}
+  header h1{font-size:16px;margin:0;font-weight:700;letter-spacing:.2px}
+  header .sub{color:var(--muted);font-size:12px;margin-left:2px}
+  header .spacer{flex:1}
+  header .teamcolors{display:flex;gap:14px;font-size:12px;color:var(--muted)}
+  header .teamcolors label{display:flex;align-items:center;gap:6px;cursor:pointer}
+  header .teamcolors input[type=color]{-webkit-appearance:none;appearance:none;border:none;background:none;
+    width:24px;height:24px;border-radius:6px;padding:0;cursor:pointer}
+  header .teamcolors input[type=color]::-webkit-color-swatch-wrapper{padding:0}
+  header .teamcolors input[type=color]::-webkit-color-swatch{border:2px solid #0c161f;border-radius:6px}
+  header .teamcolors input[type=color]::-moz-color-swatch{border:2px solid #0c161f;border-radius:6px}
+
+  .body{flex:1 1 auto;display:grid;grid-template-columns:248px 1fr;min-height:0}
+
+  /* sidebar */
+  .sidebar{background:var(--panel);border-right:1px solid var(--line);overflow-y:auto;padding:10px}
+  .search{width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--line);
+    background:var(--panel2);color:var(--ink);font-size:14px;margin-bottom:8px}
+  .grouphdr{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);
+    margin:12px 4px 6px}
+  .termbtn{display:block;width:100%;text-align:left;border:1px solid transparent;background:transparent;
+    color:var(--ink);padding:8px 10px;border-radius:8px;cursor:pointer;font-size:14px;margin-bottom:2px}
+  .termbtn:hover{background:var(--panel2)}
+  .termbtn.active{background:#23415f;border-color:#356ea3}
+  .termbtn .acc{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px;vertical-align:middle}
+
+  /* content */
+  .content{display:flex;flex-direction:column;min-height:0;min-width:0}
+  .def{padding:12px 16px;border-bottom:1px solid var(--line);background:var(--panel)}
+  .def h2{margin:0;font-size:20px}
+  .def p{margin:4px 0 0;color:var(--muted);font-size:14px}
+
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;padding:10px 16px 0}
+  .tab{border:1px solid var(--line);background:var(--panel2);color:var(--ink);padding:6px 12px;
+    border-radius:999px;cursor:pointer;font-size:13px;font-weight:600;white-space:nowrap}
+  .tab .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:middle}
+  .tab.bad{border-color:#5a4420}.tab.bad.active{background:#4a3411;border-color:var(--bad)}
+  .tab.good{border-color:#1f5a44}.tab.good.active{background:#11402c;border-color:var(--good)}
+
+  .stage{position:relative;flex:1 1 auto;min-height:0;margin:10px 16px 0;border-radius:12px;
+    overflow:hidden;background:#0b141d;border:1px solid var(--line)}
+  canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+  .anno{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);max-width:min(620px,92%);
+    background:rgba(10,18,26,.86);border:1px solid var(--line);backdrop-filter:blur(3px);
+    color:#fff;padding:9px 14px;border-radius:10px;font-size:15px;text-align:center;line-height:1.35;
+    box-shadow:0 6px 22px rgba(0,0,0,.45);opacity:0;transition:opacity .15s;pointer-events:none}
+  .anno.top{bottom:auto;top:12px}              /* sit opposite the goal so it never covers the action */
+  .anno.show{opacity:1}
+  .anno .badge{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.08em;
+    padding:2px 7px;border-radius:999px;margin-right:8px;vertical-align:middle}
+  .anno.badbadge .badge{background:var(--bad);color:#1a1206}
+  .anno.goodbadge .badge{background:var(--good);color:#04210f}
+
+  /* controls */
+  .controls{flex:0 0 auto;display:flex;align-items:center;gap:12px;padding:10px 16px;flex-wrap:wrap}
+  .btn{appearance:none;border:1px solid var(--line);background:var(--panel2);color:var(--ink);
+    width:42px;height:42px;border-radius:10px;cursor:pointer;font-size:18px;display:grid;place-items:center;flex:0 0 auto}
+  .btn:hover{background:#26384b}
+  .scrubwrap{flex:1 1 220px;display:flex;align-items:center;gap:8px;min-width:160px}
+  .time{font-variant-numeric:tabular-nums;color:var(--muted);font-size:12px;flex:0 0 auto;min-width:74px;text-align:right}
+  .speed{display:flex;align-items:center;gap:8px;flex:0 0 auto;color:var(--muted);font-size:13px}
+  input[type=range]{-webkit-appearance:none;appearance:none;height:6px;border-radius:6px;
+    background:#2a3a4d;outline:none;cursor:pointer}
+  input[type=range].scrub{flex:1}
+  input[type=range].spd{width:118px}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;
+    background:var(--accent);border:2px solid #0c161f;box-shadow:0 1px 4px rgba(0,0,0,.5)}
+  input[type=range]::-moz-range-thumb{width:18px;height:18px;border:2px solid #0c161f;border-radius:50%;background:var(--accent)}
+
+  .desc{flex:0 0 auto;padding:0 16px 14px;color:var(--muted);font-size:13.5px;max-height:22vh;overflow:auto}
+  .desc .vtitle{color:var(--ink);font-weight:700;margin-right:6px}
+
+  /* mobile */
+  @media (max-width:780px){
+    .body{grid-template-columns:1fr;grid-template-rows:auto 1fr}
+    .sidebar{border-right:none;border-bottom:1px solid var(--line);overflow-x:auto;overflow-y:hidden;
+      white-space:nowrap;display:flex;gap:6px;align-items:center;padding:8px 10px}
+    .sidebar .grouphdr{display:none}
+    .search{display:none}
+    .termbtn{display:inline-block;width:auto;margin:0;flex:0 0 auto}
+    header .teamcolors{gap:10px}
+    .def{padding:10px 14px}.def h2{font-size:18px}
+    .stage{margin:8px 10px 0}
+    .controls{padding:9px 12px;gap:10px}
+    .desc{padding:0 14px 12px;max-height:26vh}
+  }
+  @media (max-width:480px){
+    .speed .lbl{display:none}
+    .time{min-width:0}
+    header .teamcolors .cap{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="logo"></div>
+    <h1>OVFC Terminology Trainer</h1>
+    <span class="sub">trigger words, shown on the pitch</span>
+    <span class="spacer"></span>
+    <div class="teamcolors">
+      <label title="Our team colour"><input type="color" id="colUs"><span class="cap">Our team</span></label>
+      <label title="Their team colour"><input type="color" id="colThem"><span class="cap">Their team</span></label>
+    </div>
+  </header>
+
+  <div class="body">
+    <nav class="sidebar" id="sidebar">
+      <input class="search" id="search" placeholder="Search terms…" autocomplete="off">
+      <div id="termlist"></div>
+    </nav>
+
+    <main class="content">
+      <div class="def">
+        <h2 id="termName">—</h2>
+        <p id="termDef"></p>
+      </div>
+      <div class="tabs" id="tabs"></div>
+      <div class="stage" id="stage">
+        <canvas id="cv"></canvas>
+        <div class="anno" id="anno"><span class="badge"></span><span id="annoText"></span></div>
+      </div>
+      <div class="controls">
+        <button class="btn" id="restart" title="Restart">⏮</button>
+        <button class="btn" id="play" title="Play / Pause">▶</button>
+        <div class="scrubwrap">
+          <input type="range" class="scrub" id="scrub" min="0" max="1" step="0.001" value="0">
+          <span class="time" id="time">0.0 / 0.0s</span>
+        </div>
+        <div class="speed">
+          <span class="lbl">Speed</span>
+          <input type="range" class="spd" id="speed" min="0.25" max="2" step="0.05" value="1">
+          <span id="speedVal" style="min-width:34px">1.0×</span>
+        </div>
+      </div>
+      <div class="desc" id="desc"></div>
+    </main>
+  </div>
+</div>
+
+<script>
+/* ============================================================ DATA ===========
+   Coordinate convention (pitch space, normalized 0..1):
+     x : 0 = left touchline, 1 = right touchline
+     y : 0 = the goal the ATTACKERS are attacking, 1 = far edge of the shown area
+   The renderer flips for "defending" so the defended goal sits at the bottom.
+   Authoring rule: only list an entity's pos when it MOVES; otherwise it holds.
+   ball is kept ~0.02 from its carrier by hand (no attachment engine).
+============================================================================== */
+const G = (x,y)=>[x,y];
+const TERMS = [
+/* ---------------------------------------------------------------- DEFENDING */
+{
+  id:"touch-tight", name:"Touch Tight", group:"Defending",
+  def:"A defender marks an attacker so closely there is virtually no space between them.",
+  orientation:"defending", pitch:"two-thirds",
+  variants:[
+    { kind:"INCORRECT", title:"Standing off",
+      desc:"The defender gives space. The attacker receives the throw-in, turns, and drives at goal.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"d1",team:"blue"},
+        {id:"a1",team:"red"},{id:"a2",team:"red"},{id:"d2",team:"blue"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),d1:G(.46,.30),a1:G(.5,.42),a2:G(.80,.55),d2:G(.74,.48),ball:G(.12,.42)}},
+        {t:1.2,pos:{ball:G(.5,.44)},ease:"linear"},
+        {t:2.8,pos:{a1:G(.5,.52),ball:G(.5,.54)}},
+        {t:4.2,pos:{a1:G(.5,.16),ball:G(.5,.18),d1:G(.49,.30)}}],
+      pauses:[
+        {t:0,text:"Throw-in coming. Watch how far off the defender is.",point:"d1"},
+        {t:2.8,text:"Too much space — the attacker turns to face goal freely.",point:"a1",shapes:[{type:"space",at:"a1",r:.1}]},
+        {t:4.2,text:"Result: the attacker drives in on goal.",point:"a1"}] },
+    { kind:"INCORRECT", title:"Marking the zone",
+      desc:"The defender watches the ball and guards space instead of the player. The attacker is left unmarked.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"d1",team:"blue"},
+        {id:"a1",team:"red"},{id:"a2",team:"red"},{id:"d2",team:"blue"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),d1:G(.63,.35),a1:G(.5,.42),a2:G(.80,.55),d2:G(.74,.48),ball:G(.12,.42)}},
+        {t:1.2,pos:{ball:G(.5,.44)},ease:"linear"},
+        {t:2.8,pos:{a1:G(.40,.30),ball:G(.40,.32)}},
+        {t:4.0,pos:{a1:G(.45,.16),ball:G(.45,.18)}}],
+      pauses:[
+        {t:0,text:"The defender marks the ZONE, not the player.",point:"d1"},
+        {t:1.2,text:"The attacker is left completely unmarked.",point:"a1"},
+        {t:2.8,text:"Free to turn inside.",point:"a1",shapes:[{type:"run",from:G(.5,.42),to:G(.40,.30)}]},
+        {t:4.0,text:"And drives at goal.",point:"a1"}] },
+    { kind:"CORRECT", title:"Touch tight",
+      desc:"Goal-side and within a stride, between attacker and ball. The receiver gets no time and is forced backward.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"d1",team:"blue"},
+        {id:"a1",team:"red"},{id:"a2",team:"red"},{id:"d2",team:"blue"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),d1:G(.5,.40),a1:G(.5,.44),a2:G(.80,.55),d2:G(.74,.48),ball:G(.12,.42)}},
+        {t:1.2,pos:{ball:G(.5,.50)},ease:"linear"},
+        {t:2.8,pos:{a1:G(.5,.54),ball:G(.5,.57),d1:G(.5,.49)}},
+        {t:4.0,pos:{ball:G(.72,.58)}}],
+      pauses:[
+        {t:0,text:"Touch tight: a stride away, goal-side, between attacker and goal.",point:"d1"},
+        {t:2.8,text:"No time, no space — the attacker can't turn and shields the ball.",point:"a1"},
+        {t:4.0,text:"Forced backward. The attack is shut down.",point:"a1"}] }
+  ]
+},
+{
+  id:"press", name:"Press", group:"Defending",
+  def:"Recognize the cue or trigger to press and win the ball.",
+  orientation:"defending", pitch:"two-thirds",
+  variants:[
+    { kind:"INCORRECT", title:"Standing off the trigger",
+      desc:"The attacker takes a heavy touch — a clear trigger — but the defender stands off and lets them settle.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"d1",team:"blue"},
+        {id:"a1",team:"red"},{id:"a2",team:"red"},{id:"d2",team:"blue"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a1:G(.5,.60),ball:G(.5,.63),d1:G(.5,.42),a2:G(.25,.50),d2:G(.30,.42)}},
+        {t:1.2,pos:{ball:G(.5,.70)}},
+        {t:2.8,pos:{a1:G(.5,.56),ball:G(.5,.58)}},
+        {t:4.2,pos:{ball:G(.27,.50)}}],
+      pauses:[
+        {t:1.2,text:"Heavy touch! The ball is loose — a chance to press.",point:"a1",shapes:[{type:"space",at:G(.5,.70),r:.07}]},
+        {t:2.8,text:"But the defender stands off and the attacker settles.",point:"d1"},
+        {t:4.2,text:"Attacker plays out easily — chance gone.",point:"ball"}] },
+    { kind:"CORRECT", title:"Press the trigger",
+      desc:"The heavy touch is the trigger. The nearest defender closes down fast on the right angle and wins it back.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"d1",team:"blue"},
+        {id:"a1",team:"red"},{id:"a2",team:"red"},{id:"d2",team:"blue"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a1:G(.5,.60),ball:G(.5,.63),d1:G(.5,.42),a2:G(.25,.50),d2:G(.30,.42)}},
+        {t:1.0,pos:{ball:G(.5,.70),d1:G(.5,.50)}},
+        {t:2.2,pos:{d1:G(.5,.62),ball:G(.5,.66),a1:G(.46,.62)}},
+        {t:3.2,pos:{ball:G(.5,.50),d1:G(.5,.55)}}],
+      pauses:[
+        {t:1.0,text:"Trigger: heavy touch. Press now!",point:"d1"},
+        {t:2.2,text:"Defender sprints to close down on the right angle.",point:"d1",shapes:[{type:"run",from:G(.5,.42),to:G(.5,.62)}]},
+        {t:3.2,text:"Pressure wins the ball back.",point:"ball"}] }
+  ]
+},
+{
+  id:"cover", name:"Cover", group:"Defending",
+  def:"Support the player pressuring the ball by taking away the forward passing option.",
+  orientation:"defending", pitch:"two-thirds",
+  variants:[
+    { kind:"INCORRECT", title:"Both dive in",
+      desc:"Both defenders attack the ball. With no cover, a simple pass splits them and an attacker runs through.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"d1",team:"blue"},{id:"d2",team:"blue"},
+        {id:"a1",team:"red"},{id:"a2",team:"red"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a1:G(.40,.60),ball:G(.40,.63),a2:G(.62,.55),d1:G(.42,.45),d2:G(.60,.45)}},
+        {t:1.4,pos:{d1:G(.42,.56),d2:G(.55,.55),ball:G(.40,.60)}},
+        {t:2.8,pos:{ball:G(.62,.50),a2:G(.64,.48),a1:G(.40,.58)}},
+        {t:4.2,pos:{ball:G(.64,.20),a2:G(.66,.22)}}],
+      pauses:[
+        {t:0,text:"2 v 2. Watch the second defender.",point:"d2"},
+        {t:1.4,text:"Both defenders jump to the ball — no cover behind.",point:"d2",shapes:[{type:"space",at:G(.55,.40),r:.1}]},
+        {t:2.8,text:"A simple pass splits them through the gap.",point:"ball",shapes:[{type:"lane",from:"a1",to:"a2"}]},
+        {t:4.2,text:"The attacker runs through on goal.",point:"a2"}] },
+    { kind:"CORRECT", title:"Cover behind",
+      desc:"First defender pressures the ball; the second drops to cover the forward pass. The through-ball is intercepted.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"d1",team:"blue"},{id:"d2",team:"blue"},
+        {id:"a1",team:"red"},{id:"a2",team:"red"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a1:G(.40,.60),ball:G(.40,.63),a2:G(.62,.55),d1:G(.42,.45),d2:G(.60,.45)}},
+        {t:1.4,pos:{d1:G(.42,.56),d2:G(.52,.40)}},
+        {t:2.8,pos:{ball:G(.52,.47),d2:G(.51,.45)}},
+        {t:4.0,pos:{ball:G(.40,.30),d2:G(.41,.31)}}],
+      pauses:[
+        {t:0,text:"2 v 2. Watch the second defender.",point:"d2"},
+        {t:1.4,text:"First pressures; second drops to COVER the forward lane.",point:"d2",shapes:[{type:"lane",from:"a1",to:"a2"}]},
+        {t:2.8,text:"The through-ball runs straight to the covering defender.",point:"d2"},
+        {t:4.0,text:"Intercepted and cleared up the field.",point:"d2"}] }
+  ]
+},
+{
+  id:"compact", name:"Compact", group:"Defending",
+  def:"Get tight together as a unit to control time and space between the lines.",
+  orientation:"defending", pitch:"two-thirds",
+  variants:[
+    { kind:"INCORRECT", title:"Stretched apart",
+      desc:"A big gap opens between the back line and midfield. The attacker receives in the hole, turns, and attacks.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"d1",team:"blue"},{id:"d2",team:"blue"},
+        {id:"m1",team:"blue"},{id:"a1",team:"red"},{id:"a2",team:"red"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),d1:G(.38,.25),d2:G(.62,.25),m1:G(.5,.62),a1:G(.5,.42),a2:G(.5,.70),ball:G(.5,.72)}},
+        {t:1.4,pos:{ball:G(.5,.45),a1:G(.5,.43)},ease:"linear"},
+        {t:2.8,pos:{a1:G(.5,.30),ball:G(.5,.32)}}],
+      pauses:[
+        {t:0,text:"Big gap between the back line and midfield.",point:"a1",shapes:[{type:"space",at:G(.5,.49),r:.12}]},
+        {t:1.4,text:"The attacker receives in the hole — free.",point:"a1"},
+        {t:2.8,text:"Turns and runs at the back line.",point:"a1"}] },
+    { kind:"CORRECT", title:"Compact unit",
+      desc:"The lines squeeze together. There is no space to receive between them, so the attack is forced backward.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"d1",team:"blue"},{id:"d2",team:"blue"},
+        {id:"m1",team:"blue"},{id:"a1",team:"red"},{id:"a2",team:"red"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),d1:G(.40,.40),d2:G(.60,.40),m1:G(.5,.52),a1:G(.5,.47),a2:G(.5,.70),ball:G(.5,.72)}},
+        {t:1.4,pos:{ball:G(.5,.62),m1:G(.5,.56)}},
+        {t:2.8,pos:{ball:G(.5,.74),a2:G(.5,.74)}}],
+      pauses:[
+        {t:0,text:"Lines squeezed together — compact, no space between.",point:"m1",shapes:[{type:"lane",from:"m1",to:"d1"}]},
+        {t:1.4,text:"Nowhere to play between the lines.",point:"a1"},
+        {t:2.8,text:"Attack forced backward.",point:"a2"}] }
+  ]
+},
+{
+  id:"goal-side", name:"Goal Side", group:"Defending",
+  def:"Put yourself closer to our goal than the opponent. Protect the goal.",
+  orientation:"defending", pitch:"two-thirds",
+  variants:[
+    { kind:"INCORRECT", title:"Ball-watching",
+      desc:"The defender watches the ball on the wrong side of the attacker, who spins in behind toward goal.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"d1",team:"blue"},
+        {id:"a1",team:"red"},{id:"a2",team:"red"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a2:G(.20,.50),ball:G(.20,.52),a1:G(.55,.42),d1:G(.50,.46)}},
+        {t:1.6,pos:{a1:G(.60,.25),d1:G(.50,.46)}},
+        {t:2.8,pos:{ball:G(.58,.22),a1:G(.60,.18),d1:G(.52,.40)}}],
+      pauses:[
+        {t:0,text:"Defender is ball-watching, on the wrong side of the attacker.",point:"d1"},
+        {t:1.6,text:"The attacker spins in behind toward goal.",point:"a1",shapes:[{type:"run",from:G(.55,.42),to:G(.60,.25)}]},
+        {t:2.8,text:"A free run onto the ball near goal.",point:"a1"}] },
+    { kind:"CORRECT", title:"Stay goal-side",
+      desc:"The defender stays between attacker and our goal, sees both ball and runner, and gets to the ball first.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"d1",team:"blue"},
+        {id:"a1",team:"red"},{id:"a2",team:"red"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a2:G(.20,.50),ball:G(.20,.52),a1:G(.55,.42),d1:G(.54,.32)}},
+        {t:1.6,pos:{a1:G(.60,.34),d1:G(.58,.27)}},
+        {t:2.8,pos:{ball:G(.52,.30),d1:G(.53,.27)}}],
+      pauses:[
+        {t:0,text:"Defender stays GOAL-SIDE — between attacker and our goal.",point:"d1",shapes:[{type:"lane",from:"d1",to:G(.5,0)}]},
+        {t:1.6,text:"Tracks the run, always closer to goal.",point:"d1"},
+        {t:2.8,text:"First to the ball — the goal is protected.",point:"d1"}] }
+  ]
+},
+{
+  id:"delay", name:"Delay", group:"Defending",
+  def:"Get pressure on the ball to slow the attack and allow teammates to recover.",
+  orientation:"defending", pitch:"two-thirds",
+  variants:[
+    { kind:"INCORRECT", title:"Diving in",
+      desc:"Outnumbered, the defender dives in, gets beaten, and the attacker drives at goal before help arrives.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"d1",team:"blue"},{id:"d2",team:"blue"},
+        {id:"a1",team:"red"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a1:G(.5,.70),ball:G(.5,.73),d1:G(.5,.45),d2:G(.30,.85)}},
+        {t:1.2,pos:{d1:G(.5,.60),a1:G(.60,.62),ball:G(.60,.64)}},
+        {t:2.8,pos:{a1:G(.55,.30),ball:G(.55,.32),d2:G(.35,.62)}}],
+      pauses:[
+        {t:0,text:"Outnumbered — a teammate is still recovering (far).",point:"d2"},
+        {t:1.2,text:"The defender dives in and commits.",point:"d1"},
+        {t:2.8,text:"Beaten — the attacker drives at goal before help arrives.",point:"a1"}] },
+    { kind:"CORRECT", title:"Delay & jockey",
+      desc:"The defender jockeys instead of diving in, shows the attacker wide, and buys time for a teammate to recover.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"d1",team:"blue"},{id:"d2",team:"blue"},
+        {id:"a1",team:"red"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a1:G(.5,.70),ball:G(.5,.73),d1:G(.5,.45),d2:G(.30,.85)}},
+        {t:1.2,pos:{d1:G(.5,.58),a1:G(.5,.66),ball:G(.5,.68)}},
+        {t:2.8,pos:{d1:G(.44,.50),a1:G(.42,.55),ball:G(.42,.57),d2:G(.45,.70)}},
+        {t:4.0,pos:{d2:G(.50,.55),a1:G(.40,.55)}}],
+      pauses:[
+        {t:0,text:"Outnumbered — a teammate is still recovering.",point:"d2"},
+        {t:1.2,text:"DELAY: the defender jockeys, does not dive in.",point:"d1"},
+        {t:2.8,text:"Shows the attacker wide and buys time.",point:"d1",shapes:[{type:"run",from:G(.5,.66),to:G(.42,.55)}]},
+        {t:4.0,text:"Teammate recovers — now 2 v 1, pressure relieved.",point:"d2"}] }
+  ]
+},
+/* ---------------------------------------------------------------- ATTACKING */
+{
+  id:"check-in-out", name:"Check In, Check Out", group:"Attacking",
+  def:"Make a sharp run toward the ball (check in), then pivot and explode into space the other way (check out).",
+  orientation:"attacking", pitch:"two-thirds",
+  variants:[
+    { kind:"INCORRECT", title:"Standing still",
+      desc:"Receiving a throw-in, the attacker simply stands still, is marked, and the defender steps in to intercept.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"a1",team:"red"},
+        {id:"d1",team:"blue"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a1:G(.5,.55),d1:G(.5,.50),ball:G(.12,.55)}},
+        {t:1.4,pos:{ball:G(.42,.54),d1:G(.46,.53)},ease:"linear"},
+        {t:2.6,pos:{ball:G(.46,.50),d1:G(.46,.52)}}],
+      pauses:[
+        {t:0,text:"Receiver stands still and stays marked.",point:"a1"},
+        {t:1.4,text:"No movement to create any space.",point:"a1"},
+        {t:2.6,text:"The defender steps in front and intercepts.",point:"d1"}] },
+    { kind:"CORRECT", title:"Check in, check out",
+      desc:"A sharp run toward the ball drags the marker, then a pivot and explosion into space wins a free reception.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"a1",team:"red"},
+        {id:"d1",team:"blue"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a1:G(.5,.50),d1:G(.5,.44),ball:G(.12,.55)}},
+        {t:1.0,pos:{a1:G(.5,.66),d1:G(.5,.60)}},
+        {t:2.0,pos:{a1:G(.54,.40),d1:G(.5,.58)}},
+        {t:2.8,pos:{ball:G(.53,.42),a1:G(.54,.40)},ease:"linear"},
+        {t:3.8,pos:{a1:G(.5,.26),ball:G(.5,.28)}}],
+      pauses:[
+        {t:1.0,text:"CHECK IN: a sharp run toward the ball, dragging the marker.",point:"a1",shapes:[{type:"run",from:G(.5,.50),to:G(.5,.66)}]},
+        {t:2.0,text:"CHECK OUT: pivot and explode into the space behind.",point:"a1",shapes:[{type:"run",from:G(.5,.66),to:G(.54,.40)}]},
+        {t:2.8,text:"Receives free, facing the goal.",point:"a1",shapes:[{type:"space",at:"a1",r:.09}]},
+        {t:3.8,text:"Attacks with the ball.",point:"a1"}] }
+  ]
+},
+{
+  id:"switch", name:"Switch", group:"Attacking",
+  def:"Get the ball from one side of the field to the other to attack the space.",
+  orientation:"attacking", pitch:"two-thirds",
+  variants:[
+    { kind:"INCORRECT", title:"Forcing the crowded side",
+      desc:"The ball is forced down the busy side where the defenders are packed in, and gets dispossessed.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"a1",team:"red"},{id:"a2",team:"red"},
+        {id:"d1",team:"blue"},{id:"d2",team:"blue"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a1:G(.78,.55),ball:G(.78,.57),d1:G(.70,.50),d2:G(.60,.55),a2:G(.20,.50)}},
+        {t:1.2,pos:{a1:G(.82,.42),ball:G(.82,.44),d1:G(.78,.40)}},
+        {t:2.6,pos:{ball:G(.78,.46),d1:G(.80,.44)}}],
+      pauses:[
+        {t:0,text:"Ball stuck on a crowded side; a teammate is free far side.",point:"a2",shapes:[{type:"space",at:"a2",r:.1}]},
+        {t:1.2,text:"Forcing it down the busy side.",point:"a1"},
+        {t:2.6,text:"Crowded out and dispossessed.",point:"d1"}] },
+    { kind:"CORRECT", title:"Switch the play",
+      desc:"Recognize the overload and switch the ball to the free far-side player, who attacks the open space.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"a1",team:"red"},{id:"a2",team:"red"},
+        {id:"d1",team:"blue"},{id:"d2",team:"blue"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a1:G(.78,.55),ball:G(.78,.57),d1:G(.70,.50),d2:G(.60,.55),a2:G(.20,.50)}},
+        {t:1.4,pos:{ball:G(.5,.58)},ease:"linear"},
+        {t:2.2,pos:{ball:G(.24,.53),a2:G(.22,.52),d2:G(.50,.55)}},
+        {t:3.4,pos:{a2:G(.22,.35),ball:G(.22,.37)}}],
+      pauses:[
+        {t:0,text:"Defenders overload one side; the far-side player is free.",point:"a2"},
+        {t:1.4,text:"SWITCH the ball across the field.",point:"ball",shapes:[{type:"lane",from:G(.78,.57),to:G(.22,.52)}]},
+        {t:2.2,text:"The free player receives with time and space.",point:"a2",shapes:[{type:"space",at:"a2",r:.1}]},
+        {t:3.4,text:"Attacks the open side.",point:"a2"}] }
+  ]
+},
+{
+  id:"overloads", name:"Overloads", group:"Attacking",
+  def:"Create and use a numerical advantage (+1).",
+  orientation:"attacking", pitch:"two-thirds",
+  variants:[
+    { kind:"INCORRECT", title:"Going it alone",
+      desc:"In a 2 v 1 the ball carrier takes on the defender alone and is tackled — the free man is never used.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"a1",team:"red"},{id:"a2",team:"red"},
+        {id:"d1",team:"blue"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a1:G(.45,.55),ball:G(.45,.57),a2:G(.66,.50),d1:G(.50,.42)}},
+        {t:1.2,pos:{a1:G(.50,.45),ball:G(.50,.47),d1:G(.50,.43)}},
+        {t:2.4,pos:{ball:G(.48,.46),d1:G(.50,.45),a1:G(.46,.48)}}],
+      pauses:[
+        {t:0,text:"2 v 1 — an extra attacker is free.",point:"a2",shapes:[{type:"space",at:"a2",r:.09}]},
+        {t:1.2,text:"But the ball carrier takes on the defender alone.",point:"a1"},
+        {t:2.4,text:"Tackled — the free man was never used.",point:"a2"}] },
+    { kind:"CORRECT", title:"Use the +1",
+      desc:"Carry at the defender to commit them, then release the free player. Numbers up, attack on goal.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"a1",team:"red"},{id:"a2",team:"red"},
+        {id:"d1",team:"blue"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a1:G(.45,.55),ball:G(.45,.57),a2:G(.66,.50),d1:G(.50,.42)}},
+        {t:1.2,pos:{a1:G(.50,.46),ball:G(.50,.48),d1:G(.50,.44)}},
+        {t:2.0,pos:{ball:G(.64,.48),a2:G(.66,.47)},ease:"linear"},
+        {t:3.0,pos:{a2:G(.66,.28),ball:G(.66,.30)}}],
+      pauses:[
+        {t:0,text:"2 v 1 — identify the extra man.",point:"a2",shapes:[{type:"space",at:"a2",r:.09}]},
+        {t:1.2,text:"Carry AT the defender to commit them.",point:"a1",shapes:[{type:"run",from:G(.45,.55),to:G(.50,.46)}]},
+        {t:2.0,text:"Release the free player (+1).",point:"ball",shapes:[{type:"lane",from:"a1",to:"a2"}]},
+        {t:3.0,text:"Numbers up — attack on goal.",point:"a2"}] }
+  ]
+},
+{
+  id:"half-turn", name:"Half Turn", group:"Attacking",
+  def:"Open your body to see where the pass is coming from and where you want to go with it.",
+  orientation:"attacking", pitch:"two-thirds",
+  variants:[
+    { kind:"INCORRECT", title:"Back to goal",
+      desc:"The receiver stays square with their back to goal, gets pinned by the marker, and is forced backward.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"a1",team:"red"},{id:"a2",team:"red"},
+        {id:"a3",team:"red"},{id:"d1",team:"blue"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a2:G(.5,.78),ball:G(.5,.80),a1:G(.5,.55),d1:G(.5,.48),a3:G(.5,.30)}},
+        {t:1.2,pos:{ball:G(.5,.57),a1:G(.5,.55)},ease:"linear"},
+        {t:2.4,pos:{a1:G(.5,.62),ball:G(.5,.64),d1:G(.5,.50)}},
+        {t:3.4,pos:{ball:G(.5,.76),a2:G(.5,.76)}}],
+      pauses:[
+        {t:0,text:"Receiver is square, back to goal, can't see forward.",point:"a1"},
+        {t:1.2,text:"Receives blind with the defender on his back.",point:"d1"},
+        {t:2.4,text:"Pinned — forced to play backward.",point:"a1"},
+        {t:3.4,text:"No progress.",point:"a2"}] },
+    { kind:"CORRECT", title:"Half turn",
+      desc:"The receiver opens their body before receiving, takes the first touch forward, breaks the line, and plays ahead.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"a1",team:"red"},{id:"a2",team:"red"},
+        {id:"a3",team:"red"},{id:"d1",team:"blue"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a2:G(.5,.78),ball:G(.5,.80),a1:G(.55,.55),d1:G(.5,.48),a3:G(.40,.30)}},
+        {t:1.2,pos:{ball:G(.54,.57),a1:G(.55,.55)},ease:"linear"},
+        {t:2.2,pos:{a1:G(.52,.46),ball:G(.52,.48),d1:G(.5,.50)}},
+        {t:3.2,pos:{ball:G(.42,.32),a3:G(.40,.30)},ease:"linear"}],
+      pauses:[
+        {t:0,text:"Receiver opens the body — HALF TURN — to see the whole field.",point:"a1",shapes:[{type:"space",at:"a1",r:.09}]},
+        {t:1.2,text:"Receives side-on, already facing forward.",point:"a1"},
+        {t:2.2,text:"First touch forward — breaks the line past the marker.",point:"a1",shapes:[{type:"run",from:G(.55,.55),to:G(.52,.46)}]},
+        {t:3.2,text:"Plays forward — the attack progresses.",point:"a3",shapes:[{type:"lane",from:"a1",to:"a3"}]}] }
+  ]
+}
+];
+
+/* ========================================================== ENGINE =========== */
+const easeInOut = t => t<.5 ? 2*t*t : 1-Math.pow(-2*t+2,2)/2;
+const lerp = (a,b,t)=>a+(b-a)*t;
+
+function compileVariant(v){
+  const ids = v.entities.map(e=>e.id);
+  const kfs = v.keyframes.slice().sort((a,b)=>a.t-b.t);
+  // first explicit position for each entity (seed before its first move)
+  const firstPos = {};
+  for(const kf of kfs) for(const id in kf.pos) if(!firstPos[id]) firstPos[id]=kf.pos[id];
+  const last = {}; for(const id of ids) last[id]=firstPos[id]||[0.5,0.5];
+  const frames = [];
+  for(const kf of kfs){
+    for(const id in kf.pos) last[id]=kf.pos[id];
+    const snap = {}; for(const id of ids) snap[id]=last[id];
+    frames.push({t:kf.t,pos:snap,ease:kf.ease||"easeInOut"});
+    if(kf.hold){ const s2={}; for(const id of ids) s2[id]=last[id];
+      frames.push({t:kf.t+kf.hold,pos:s2,ease:"linear"}); }
+  }
+  const duration = frames.length?frames[frames.length-1].t:0;
+  const pauses = (v.pauses||[]).slice().sort((a,b)=>a.t-b.t);
+  return {variant:v,entities:v.entities,frames,duration,pauses};
+}
+function samplePos(comp,id,t){
+  const F=comp.frames;
+  if(!F.length) return [0.5,0.5];
+  if(t<=F[0].t) return F[0].pos[id];
+  if(t>=F[F.length-1].t) return F[F.length-1].pos[id];
+  for(let i=0;i<F.length-1;i++){
+    if(t>=F[i].t && t<=F[i+1].t){
+      const span=F[i+1].t-F[i].t || 1e-6;
+      let f=(t-F[i].t)/span;
+      f = F[i+1].ease==="linear"?f:easeInOut(f);
+      const a=F[i].pos[id], b=F[i+1].pos[id];
+      return [lerp(a[0],b[0],f),lerp(a[1],b[1],f)];
+    }
+  }
+  return F[F.length-1].pos[id];
+}
+const PAUSE_WIN = 0.14;
+function pauseAt(comp,t){
+  for(const p of comp.pauses) if(Math.abs(p.t-t)<PAUSE_WIN) return p;
+  return null;
+}
+
+/* ----- team colours ("our team" / "their team", user-selectable, persisted) ----- */
+const DEFAULT_COLORS = { us:"#2f6fe0", them:"#e23b3b" };   // our team = Blue, their team = Red
+function loadColors(){ try{ const s=JSON.parse(localStorage.getItem("ovfc-colors")); if(s&&s.us&&s.them) return {us:s.us,them:s.them}; }catch(e){} return {...DEFAULT_COLORS}; }
+function saveColors(){ try{ localStorage.setItem("ovfc-colors", JSON.stringify(S.colors)); }catch(e){} }
+// A term's `orientation` says whether WE attack or defend, so "us" is the side that matches it.
+function isUs(e){ return e.team === (S.term.orientation==="attacking" ? "red" : "blue"); }
+function teamColorOf(e){ return isUs(e) ? S.colors.us : S.colors.them; }
+// black or white text, whichever reads on the given fill colour
+function readableOn(hex){ const c=hex.replace('#',''); const r=parseInt(c.slice(0,2),16),g=parseInt(c.slice(2,4),16),b=parseInt(c.slice(4,6),16);
+  return (0.299*r+0.587*g+0.114*b)/255 > 0.62 ? "#10202e" : "#fff"; }
+
+/* ----- playback state ----- */
+const S = { term:null, vIndex:0, comp:null, t:0, playing:false, speed:1, scrubbing:false, lastNow:null, colors:loadColors() };
+
+function loadVariant(term,vIndex){
+  S.term=term; S.vIndex=vIndex; S.comp=compileVariant(term.variants[vIndex]);
+  S.t=0; S.playing=false;
+  buildTabs(); updateDesc(); updatePlayBtn(); render();
+}
+function play(){
+  if(!S.comp) return;
+  if(S.t>=S.comp.duration) S.t=0;                 // replay from start at the end
+  const p=pauseAt(S.comp,S.t);                    // nudge off a parked pause so it won't re-fire
+  if(p) S.t=p.t+0.001;
+  S.playing=true; updatePlayBtn();
+}
+function pause(){ S.playing=false; updatePlayBtn(); }
+function togglePlay(){ S.playing?pause():play(); }
+function advance(dt){
+  const prev=S.t;
+  let nt=S.t+dt;
+  // stop at the earliest pause crossed during this step
+  let hit=null;
+  for(const p of S.comp.pauses){ if(p.t>prev && p.t<=nt){ hit=p; break; } }
+  if(hit){ nt=hit.t; S.playing=false; }
+  if(nt>=S.comp.duration){ nt=S.comp.duration; S.playing=false; }
+  S.t=nt;
+}
+function seekFraction(f){
+  if(!S.comp) return;
+  S.playing=false;
+  S.t=Math.max(0,Math.min(1,f))*S.comp.duration;
+}
+
+/* ========================================================== RENDER =========== */
+const cv=document.getElementById('cv'), ctx=cv.getContext('2d');
+const stageEl=document.getElementById('stage');
+const annoEl=document.getElementById('anno'), annoText=document.getElementById('annoText');
+let dpr=1, cssW=0, cssH=0, rect={x:0,y:0,w:0,h:0};
+
+function resize(){
+  dpr=Math.max(1,Math.min(3,window.devicePixelRatio||1));
+  cssW=stageEl.clientWidth; cssH=stageEl.clientHeight;
+  cv.width=Math.round(cssW*dpr); cv.height=Math.round(cssH*dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  computeRect(); render();
+}
+function computeRect(){
+  const v=S.term?S.term.variants[S.vIndex]:null;
+  const R = (S.term && S.term.pitch==="half")?1.0:1.2;     // field height:width
+  const pad=18, gpad=22;                                    // gpad: room for goal beyond field
+  const availW=Math.max(40,cssW-pad*2), availH=Math.max(40,cssH-gpad*2);
+  let w=Math.min(availW,availH/R), h=w*R;
+  rect={x:(cssW-w)/2, y:(cssH-h)/2, w, h};
+}
+function project(x,y){
+  const yy = (S.term && S.term.orientation==="defending") ? (1-y) : y;
+  return [rect.x+x*rect.w, rect.y+yy*rect.h];
+}
+function P(ref,t){ return Array.isArray(ref)?project(ref[0],ref[1]):(()=>{const p=samplePos(S.comp,ref,t);return project(p[0],p[1]);})(); }
+
+function drawPitch(){
+  const r=rect;
+  // turf with mowing stripes
+  ctx.save();
+  ctx.beginPath(); ctx.rect(r.x,r.y,r.w,r.h); ctx.clip();
+  const bands=7;
+  for(let i=0;i<bands;i++){
+    ctx.fillStyle = i%2? "#2f9e57":"#2b9350";
+    ctx.fillRect(r.x, r.y+i*(r.h/bands), r.w, r.h/bands+1);
+  }
+  ctx.restore();
+  ctx.lineWidth=2; ctx.strokeStyle="rgba(255,255,255,.9)";
+  ctx.strokeRect(r.x,r.y,r.w,r.h);
+
+  // goal-end markings (y=0 end). penalty + 6yd box, spot, arc.
+  const line=(x1,y1,x2,y2)=>{const a=project(x1,y1),b=project(x2,y2);ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke();};
+  // penalty box
+  line(.20,0,.20,.22); line(.80,0,.80,.22); line(.20,.22,.80,.22);
+  // six-yard box
+  line(.36,0,.36,.09); line(.64,0,.64,.09); line(.36,.09,.64,.09);
+  // penalty spot
+  const sp=project(.5,.15); ctx.fillStyle="#fff"; ctx.beginPath(); ctx.arc(sp[0],sp[1],2.5,0,7); ctx.fill();
+  // D arc
+  const c=project(.5,.15); const rr=Math.abs(project(.62,.15)[0]-c[0]);
+  ctx.beginPath();
+  const down = !(S.term && S.term.orientation==="defending"); // arc opens away from goal
+  ctx.arc(c[0],c[1],rr, down?0.15*Math.PI:1.15*Math.PI, down?0.85*Math.PI:1.85*Math.PI);
+  ctx.stroke();
+  // far-edge halfway arc (two-thirds view)
+  if(!S.term || S.term.pitch!=="half"){
+    const hc=project(.5,1);
+    ctx.beginPath(); ctx.arc(hc[0],hc[1],rr, down?1.15*Math.PI:0.15*Math.PI, down?1.85*Math.PI:0.85*Math.PI); ctx.stroke();
+  }
+  // goal frame (drawn beyond the line)
+  const goalDepth=0.045;
+  const gy = -goalDepth;
+  const g1=project(.40,0), g2=project(.60,0), g3=project(.40,gy), g4=project(.60,gy);
+  ctx.fillStyle="rgba(255,255,255,.25)"; ctx.strokeStyle="#fff"; ctx.lineWidth=2.5;
+  ctx.beginPath();
+  ctx.moveTo(g1[0],g1[1]);ctx.lineTo(g3[0],g3[1]);ctx.lineTo(g4[0],g4[1]);ctx.lineTo(g2[0],g2[1]);
+  ctx.stroke();
+  // net hatch
+  ctx.save(); ctx.globalAlpha=.5; ctx.lineWidth=1; ctx.strokeStyle="#fff";
+  for(let i=1;i<5;i++){const a=project(.40+.20*i/5,0),b=project(.40+.20*i/5,gy);ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke();}
+  ctx.restore();
+}
+function drawShapes(p){
+  if(!p || !p.shapes) return; const t=S.t;
+  ctx.save(); ctx.lineWidth=2.5; ctx.setLineDash([7,5]);
+  for(const s of p.shapes){
+    ctx.strokeStyle="rgba(255,221,71,.95)"; ctx.fillStyle="rgba(255,221,71,.16)";
+    if(s.type==="space"){const c=P(s.at,t); const rr=(s.r||.08)*rect.w;
+      ctx.beginPath(); ctx.arc(c[0],c[1],rr,0,7); ctx.fill(); ctx.stroke();}
+    else if(s.type==="lane"){const a=P(s.from,t),b=P(s.to,t);
+      ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke();}
+    else if(s.type==="run"){const a=P(s.from,t),b=P(s.to,t);
+      ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke();
+      const ang=Math.atan2(b[1]-a[1],b[0]-a[0]),h=10; ctx.setLineDash([]);
+      ctx.beginPath();ctx.moveTo(b[0],b[1]);
+      ctx.lineTo(b[0]-h*Math.cos(ang-.4),b[1]-h*Math.sin(ang-.4));
+      ctx.lineTo(b[0]-h*Math.cos(ang+.4),b[1]-h*Math.sin(ang+.4));
+      ctx.closePath();ctx.fillStyle="rgba(255,221,71,.95)";ctx.fill();ctx.setLineDash([7,5]);}
+  }
+  ctx.restore();
+}
+function drawEntity(e){
+  const pr=samplePos(S.comp,e.id,S.t), c=project(pr[0],pr[1]);
+  const R=Math.max(11, rect.w*0.036);
+  if(e.kind==="ball"){
+    ctx.beginPath(); ctx.arc(c[0],c[1],R*0.46,0,7);
+    ctx.fillStyle="#fff"; ctx.fill(); ctx.lineWidth=1.5; ctx.strokeStyle="#1a1a1a"; ctx.stroke();
+    return;
+  }
+  const col = teamColorOf(e);
+  ctx.beginPath(); ctx.arc(c[0],c[1],R,0,7);
+  ctx.fillStyle=col; ctx.fill();
+  ctx.lineWidth=3; ctx.strokeStyle = e.role==="keeper"?"#ffe14d":"#fff"; ctx.stroke();
+  if(e.label){ ctx.fillStyle=readableOn(col); ctx.font=`700 ${Math.round(R*0.8)}px system-ui`;
+    ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText(e.label,c[0],c[1]); }
+}
+function drawCallout(p){
+  if(!p || !p.point) return;
+  const pr=samplePos(S.comp,p.point,S.t), c=project(pr[0],pr[1]);
+  const R=Math.max(11,rect.w*0.036);
+  ctx.save(); ctx.lineWidth=3; ctx.strokeStyle="rgba(255,221,71,.95)"; ctx.setLineDash([4,4]);
+  ctx.beginPath(); ctx.arc(c[0],c[1],R*1.7,0,7); ctx.stroke(); ctx.restore();
+}
+function render(){
+  ctx.clearRect(0,0,cssW,cssH);
+  if(!S.term){ return; }
+  drawPitch();
+  const dp = pauseAt(S.comp,S.t);
+  drawShapes(dp);
+  for(const e of S.comp.entities) if(e.kind!=="ball") drawEntity(e);
+  for(const e of S.comp.entities) if(e.kind==="ball") drawEntity(e);
+  drawCallout(dp);
+  // annotation overlay + scrub/time
+  const kind=S.term.variants[S.vIndex].kind;
+  // place the banner at the end AWAY from the goal (goal is at bottom when defending)
+  const topAnno = S.term.orientation==="defending" ? "top" : "";
+  if(dp){ annoText.textContent=dp.text;
+    annoEl.querySelector('.badge').textContent = kind==="CORRECT"?"CORRECT":"INCORRECT";
+    annoEl.className="anno show "+topAnno+" "+(kind==="CORRECT"?"goodbadge":"badbadge");
+  } else { annoEl.className="anno "+topAnno; }
+  if(!S.scrubbing){ scrub.value = S.comp.duration? (S.t/S.comp.duration):0; }
+  timeEl.textContent = `${S.t.toFixed(1)} / ${S.comp.duration.toFixed(1)}s`;
+}
+
+/* ========================================================== UI ============== */
+const termlist=document.getElementById('termlist');
+const tabsEl=document.getElementById('tabs');
+const descEl=document.getElementById('desc');
+const nameEl=document.getElementById('termName');
+const defEl=document.getElementById('termDef');
+const playBtn=document.getElementById('play');
+const scrub=document.getElementById('scrub');
+const timeEl=document.getElementById('time');
+const speed=document.getElementById('speed');
+const speedVal=document.getElementById('speedVal');
+const search=document.getElementById('search');
+
+function buildTermList(filter=""){
+  termlist.innerHTML="";
+  const groups={};
+  for(const t of TERMS){ if(filter && !t.name.toLowerCase().includes(filter.toLowerCase())) continue;
+    (groups[t.group]=groups[t.group]||[]).push(t); }
+  for(const g of ["Defending","Attacking"]){
+    if(!groups[g]) continue;
+    const h=document.createElement('div'); h.className="grouphdr"; h.textContent=g; termlist.appendChild(h);
+    for(const t of groups[g]){
+      const b=document.createElement('button'); b.className="termbtn"+(S.term&&S.term.id===t.id?" active":"");
+      b.dataset.id=t.id;
+      b.innerHTML=`<span class="acc" style="background:${S.colors.us}"></span>${t.name}`;
+      b.onclick=()=>selectTerm(t);
+      termlist.appendChild(b);
+    }
+  }
+}
+function selectTerm(t){
+  nameEl.textContent=t.name; defEl.textContent=t.def;
+  loadVariant(t,0);
+  for(const b of termlist.querySelectorAll('.termbtn')) b.classList.toggle('active', b.dataset.id===t.id);
+}
+function buildTabs(){
+  tabsEl.innerHTML="";
+  S.term.variants.forEach((v,i)=>{
+    const b=document.createElement('button');
+    const good=v.kind==="CORRECT";
+    b.className="tab "+(good?"good":"bad")+(i===S.vIndex?" active":"");
+    b.innerHTML=`<span class="dot" style="background:${good?"var(--good)":"var(--bad)"}"></span>${v.kind==="CORRECT"?"Correct":"Incorrect"} — ${v.title}`;
+    b.onclick=()=>loadVariant(S.term,i);
+    tabsEl.appendChild(b);
+  });
+}
+function updateDesc(){
+  const v=S.term.variants[S.vIndex];
+  descEl.innerHTML=`<span class="vtitle">${v.kind==="CORRECT"?"✔ ":"✖ "}${v.title}.</span>${v.desc}`;
+}
+function updatePlayBtn(){ playBtn.textContent = S.playing? "⏸":"▶"; }
+
+/* events */
+playBtn.onclick=togglePlay;
+document.getElementById('restart').onclick=()=>{ S.t=0; S.playing=false; updatePlayBtn(); render(); };
+scrub.addEventListener('pointerdown',()=>S.scrubbing=true);
+scrub.addEventListener('pointerup',()=>S.scrubbing=false);
+scrub.addEventListener('input',()=>{ seekFraction(parseFloat(scrub.value)); updatePlayBtn(); render(); });
+scrub.addEventListener('change',()=>{ S.scrubbing=false; });
+speed.addEventListener('input',()=>{ S.speed=parseFloat(speed.value); speedVal.textContent=S.speed.toFixed(2).replace(/0$/,'')+"×"; });
+search.addEventListener('input',()=>buildTermList(search.value));
+
+/* team-colour pickers */
+const colUs=document.getElementById('colUs'), colThem=document.getElementById('colThem');
+function syncPickers(){ colUs.value=S.colors.us; colThem.value=S.colors.them; }
+colUs.addEventListener('input',()=>{ S.colors.us=colUs.value; saveColors(); buildTermList(search.value); render(); });
+colThem.addEventListener('input',()=>{ S.colors.them=colThem.value; saveColors(); render(); });
+
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==="INPUT") return;
+  if(e.code==="Space"){ e.preventDefault(); togglePlay(); }
+  else if(e.key==="ArrowRight"){ seekFraction((S.t+0.3)/S.comp.duration); render(); }
+  else if(e.key==="ArrowLeft"){ seekFraction((S.t-0.3)/S.comp.duration); render(); }
+});
+
+new ResizeObserver(resize).observe(stageEl);
+window.addEventListener('resize',resize);
+
+function frame(now){
+  if(S.lastNow==null) S.lastNow=now;
+  let dt=(now-S.lastNow)/1000; S.lastNow=now;
+  dt=Math.min(dt,0.05);
+  if(S.playing){ advance(dt*S.speed); }
+  render();
+  requestAnimationFrame(frame);
+}
+
+/* ---- test/debug surface: expose the engine so the headless harness can drive it,
+        and support deep-links like #term=press&v=1&t=2.4&play ---- */
+window.OVFC = {
+  TERMS, get S(){return S;}, compileVariant, samplePos, pauseAt, advance, seekFraction,
+  play, pause, loadVariant, render,
+  // drive the clock deterministically without rAF (for tests)
+  step(dt){ advance(dt); render(); },
+  // current positions of every entity, plus clock info — what tests assert on
+  snapshot(){
+    const ents={};
+    for(const e of S.comp.entities){ const p=samplePos(S.comp,e.id,S.t); ents[e.id]=p; }
+    return { termId:S.term.id, vIndex:S.vIndex, kind:S.term.variants[S.vIndex].kind,
+      t:S.t, duration:S.comp.duration, playing:S.playing,
+      activePause: (pauseAt(S.comp,S.t)||{}).text||null, entities:ents };
+  },
+  selectById(id, v){ const t=TERMS.find(x=>x.id===id); if(t){ selectTerm(t); if(v!=null) loadVariant(t,v); } },
+  // resolve the rendered colour of an entity in any term/variant (used by colour tests)
+  entityColorFor(termId, vIndex, entityId){
+    const t=TERMS.find(x=>x.id===termId); const v=t.variants[vIndex];
+    const e=v.entities.find(x=>x.id===entityId);
+    const us = e.team === (t.orientation==="attacking" ? "red" : "blue");
+    return us ? S.colors.us : S.colors.them;
+  }
+};
+function applyHash(){
+  const h=new URLSearchParams(location.hash.slice(1));
+  if(h.has('term')){ const t=TERMS.find(x=>x.id===h.get('term')); if(t) selectTerm(t); }
+  if(h.has('v')) loadVariant(S.term, parseInt(h.get('v'))||0);
+  if(h.has('t')){ S.t=parseFloat(h.get('t'))||0; render(); }
+  if(h.has('play')) play();
+}
+window.addEventListener('hashchange',applyHash);
+
+/* boot */
+syncPickers();
+buildTermList();
+selectTerm(TERMS[0]);
+resize();
+speedVal.textContent="1×";
+applyHash();
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

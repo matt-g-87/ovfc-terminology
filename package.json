@@ -1,0 +1,9 @@
+{
+  "name": "ovfc-terminology",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Interactive trainer for OVFC soccer trigger words with an animated 2D pitch.",
+  "scripts": {
+    "test": "node test/run-tests.js"
+  }
+}
