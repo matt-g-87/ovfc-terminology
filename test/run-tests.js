@@ -30,18 +30,19 @@ function onPitch(p){ // allow a little slack for the goal/keeper drawn just beyo
   check(terms.length>=10, `at least 10 terms present (got ${terms.length})`);
 
   // 1) Drive EVERY term/variant through its whole timeline from t=0, like pressing Play.
-  //    Assert: no uncaught exceptions, no console errors, all positions finite & on-pitch,
-  //    and the clock actually halts at each annotation pause.
+  //    dwellBase=0 makes the auto-cycle flow straight through stages (no 8s holds) so the
+  //    sweep is fast. Assert: no exceptions, all positions finite & on-pitch, the clock
+  //    actually lands on each stage, and auto-cycle stops cleanly at the end (never past it).
+  await b.eval(`(window.OVFC.S.dwellBase=0, 1)`);
   for(const t of terms){
     for(let v=0; v<t.n; v++){
       await b.eval(`(window.OVFC.selectById(${JSON.stringify(t.id)}, ${v}), 1)`);
       const dur = await b.eval(`window.OVFC.S.comp.duration`);
       const label = `${t.id} v${v}`;
 
-      // simulate Play: nudge off t=0 pause then step the clock in 60fps increments
       await b.eval(`(window.OVFC.play(), 1)`);
-      const steps = Math.ceil((dur+1.0)/0.05) + 5;
-      let sawPause = false, badPos = null, lastT = -1, stalls = 0;
+      const steps = Math.ceil((dur+1.0)/0.05) + 10;
+      let sawPause = false, badPos = null, overran = false;
       for(let i=0;i<steps;i++){
         const snap = await b.eval(`window.OVFC.snapshot()`);
         for(const id in snap.entities){
@@ -50,15 +51,36 @@ function onPitch(p){ // allow a little slack for the goal/keeper drawn just beyo
           if(!onPitch(p)) { badPos = `${label}: ${id} off-pitch ${JSON.stringify(p)} @t=${snap.t.toFixed(2)}`; break; }
         }
         if(badPos) break;
+        if(snap.t > dur + 1e-6) overran = true;
         if(snap.activePause) sawPause = true;
-        // if the engine paused at an annotation, resume (mimic the user pressing play)
-        if(!snap.playing && snap.t < dur - 1e-3){ await b.eval(`(window.OVFC.play(), 1)`); }
         await b.eval(`(window.OVFC.step(0.05), 1)`);
       }
+      const endSnap = await b.eval(`window.OVFC.snapshot()`);
       check(badPos===null, badPos || `${label}: positions stayed finite & on-pitch`);
-      check(sawPause===true, `${label}: hit at least one annotation pause`);
+      check(sawPause===true, `${label}: hit at least one annotation stage`);
+      check(!overran && endSnap.t<=dur+1e-6 && endSnap.playing===false,
+        `${label}: auto-cycle stopped cleanly at the end (no loop/overrun)`);
     }
   }
+  await b.eval(`(window.OVFC.S.dwellBase=8, 1)`);  // restore default for the dwell/step checks
+
+  // 1b) Auto-cycle dwell + Forward/Back stepping (new playback model).
+  await b.eval(`(window.OVFC.selectById("press",1), window.OVFC.S.dwellBase=8, 1)`);
+  const pauses = await b.eval(`window.OVFC.S.comp.pauses.map(p=>p.t)`);
+  // play, then step the clock past the first stage; with an 8s dwell it must HOLD there
+  await b.eval(`(window.OVFC.play(), 1)`);
+  for(let i=0;i<40;i++) await b.eval(`(window.OVFC.step(0.05), 1)`);  // ~2s of virtual time
+  const held = await b.eval(`window.OVFC.snapshot()`);
+  check(Math.abs(held.t - pauses[0]) < 0.2 && held.playing===true && held.activePause!==null,
+    `dwell: auto-cycle holds on a stage during the 8s dwell (t≈${pauses[0]})`);
+  // nextStage/prevStage land exactly on stage times and pause
+  await b.eval(`(window.OVFC.seekFraction(0), window.OVFC.nextStage(), 1)`);
+  const ns = await b.eval(`window.OVFC.snapshot()`);
+  check(Math.abs(ns.t - pauses.find(p=>p>1e-3)) < 1e-6 && ns.playing===false,
+    `nextStage lands on the next stage and pauses`);
+  await b.eval(`(window.OVFC.prevStage(), 1)`);
+  const ps = await b.eval(`window.OVFC.snapshot()`);
+  check(ps.t < ns.t && ps.playing===false, `prevStage steps back and pauses`);
 
   // 2) Scrubbing to arbitrary times never throws and stays on-pitch (seek path).
   await b.eval(`(window.OVFC.selectById("touch-tight",0),1)`);
