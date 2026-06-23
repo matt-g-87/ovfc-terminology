@@ -149,6 +149,42 @@ function onPitch(p){ // allow a little slack for the goal/keeper drawn just beyo
   check(await b.eval(`window.OVFC.entityColorFor("touch-tight",2,"d1")`)==="#00ff88", 'custom us-colour is reflected');
   await b.eval(`(window.OVFC.S.colors.us=${JSON.stringify(us)}, 1)`); // restore
 
+  // 2c) "YOU" focus markers: every term has exactly one focal player, present in every
+  //     variant, and on OUR team (so its rendered colour is the us-colour).
+  const focusOk = await b.eval(`(function(){
+    const F=window.OVFC.FOCUS, US=window.OVFC.S.colors.us;
+    for(const t of window.OVFC.TERMS){
+      const fid=F[t.id]; if(!fid) return "no focus for "+t.id;
+      for(let i=0;i<t.variants.length;i++){
+        if(!t.variants[i].entities.some(e=>e.id===fid)) return "focus "+fid+" missing in "+t.id+" v"+i;
+        if(window.OVFC.entityColorFor(t.id,i,fid)!==US) return "focus "+fid+" not our-team in "+t.id+" v"+i;
+      }
+    }
+    return "ok";
+  })()`);
+  check(focusOk==="ok", `YOU focus: one focal our-team player per term/variant (${focusOk})`);
+
+  // 2d) Throw-ins have a visible thrower entity on the sideline.
+  const throwOk = await b.eval(`(function(){
+    for(const id of ["touch-tight","check-in-out"]){
+      const t=window.OVFC.TERMS.find(x=>x.id===id);
+      for(let i=0;i<t.variants.length;i++){
+        const v=t.variants[i]; if(!v.throwIn) continue;
+        const thr=v.entities.find(e=>e.id==="thr"); if(!thr) return "no thrower in "+id+" v"+i;
+        const k0=v.keyframes[0].pos.thr; if(!k0 || k0[0]>0.08) return "thrower not on sideline in "+id+" v"+i;
+      }
+    }
+    return "ok";
+  })()`);
+  check(throwOk==="ok", `throw-in: a sideline thrower entity is present (${throwOk})`);
+
+  // 2e) Vision cones resolve a facing target on the terms that should have them.
+  for(const [id,v,ent] of [["half-turn",1,"a1"],["goal-side",0,"d1"],["switch",1,"a1"]]){
+    await b.eval(`(window.OVFC.selectById(${JSON.stringify(id)},${v}), window.OVFC.seekFraction(0.05), 1)`);
+    const hasFace = await b.eval(`!!window.OVFC.sampleFace(window.OVFC.S.comp, ${JSON.stringify(ent)}, window.OVFC.S.t)`);
+    check(hasFace===true, `vision cone: ${id} v${v} ${ent} has a facing target`);
+  }
+
   // 3) The whole run must be free of page exceptions / console errors.
   check(b.exceptions.length===0,
     b.exceptions.length ? 'NO uncaught exceptions — but found:\n    '+b.exceptions.slice(0,6).join('\n    ')
