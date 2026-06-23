@@ -215,7 +215,7 @@ const TERMS = [
         {t:3.6,text:"Unmarked, the attacker walks the ball in…",point:"a1"},
         {t:4.8,text:"…and finishes hard into the left corner.",point:"a1"}] },
     { kind:"INCORRECT", title:"Marking the zone",
-      desc:"The defender guards space, not the player. Once beaten he trails the attacker but can't keep up.",
+      desc:"The defender guards space, not the player. Once beaten they trail the attacker but can't keep up.",
       throwIn:{side:"left",label:"Opponent Throw",until:1.4},
       entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"d1",team:"blue"},
         {id:"a1",team:"red"},{id:"a2",team:"red"},{id:"d2",team:"blue"},{id:"thr",team:"red"},{id:"ball",kind:"ball"}],
@@ -227,7 +227,7 @@ const TERMS = [
       pauses:[
         {t:0,text:"The defender marks the ZONE, not the player.",point:"d1"},
         {t:1.4,text:"The attacker is left unmarked to receive.",point:"a1"},
-        {t:2.8,text:"He trails the attacker — but a full step behind.",point:"d1",shapes:[{type:"run",from:"d1",to:"a1"}]},
+        {t:2.8,text:"They trail the attacker — but a full step behind.",point:"d1",shapes:[{type:"run",from:"d1",to:"a1"}]},
         {t:4.2,text:"Can't catch up — the attacker drives in and scores.",point:"a1"}] },
     { kind:"CORRECT", title:"Touch tight",
       desc:"Goal-side and within a stride, between attacker and ball. The receiver gets no time and is forced backward.",
@@ -265,19 +265,21 @@ const TERMS = [
         {t:2.8,text:"Still no pressure — backed right in toward goal.",point:"d1",shapes:[{type:"space",at:"a1",r:.11}]},
         {t:4.2,text:"Unpressured, the attacker strikes and scores.",point:"a1"}] },
     { kind:"CORRECT", title:"Press the trigger",
-      desc:"The nearest defender presses on the right angle; the pressure forces a loose touch he wins — while the second defender covers behind.",
+      desc:"The nearest defender presses on the right angle; the pressure forces a loose touch they win — while the second defender covers behind.",
       entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"d1",team:"blue"},
         {id:"a1",team:"red"},{id:"a2",team:"red"},{id:"d2",team:"blue"},{id:"ball",kind:"ball"}],
       keyframes:[
         {t:0,pos:{gk:G(.5,.06),a1:G(.5,.62),ball:G(.5,.64),d1:G(.5,.44),a2:G(.28,.52),d2:G(.40,.40)}},
         {t:1.2,pos:{d1:G(.5,.56),d2:G(.42,.47)}},
         {t:2.6,pos:{a1:G(.55,.66),ball:G(.60,.71),d1:G(.52,.60)},ease:"linear"},
-        {t:3.8,pos:{ball:G(.5,.56),d1:G(.5,.58)}}],
+        {t:3.8,pos:{ball:G(.58,.69),d1:G(.56,.67)}},
+        {t:5.2,pos:{d1:G(.52,.82),ball:G(.52,.84)}}],
       pauses:[
         {t:0,text:"Trigger: the defender steps to press the player on the ball.",point:"d1"},
-        {t:1.2,text:"He presses; the second defender drops to COVER the forward pass.",point:"d2",shapes:[{type:"lane",from:"a1",to:"a2"}]},
+        {t:1.2,text:"They press; the second defender drops to COVER the forward pass.",point:"d2",shapes:[{type:"lane",from:"a1",to:"a2"}]},
         {t:2.6,text:"Pressure forces a heavy touch — the ball runs loose.",point:"a1",shapes:[{type:"space",at:"ball",r:.07}]},
-        {t:3.8,text:"The defender capitalizes and wins it back.",point:"d1"}] }
+        {t:3.8,text:"The defender capitalizes and wins it back.",point:"d1"},
+        {t:5.2,text:"Now in possession, YOU carry it up the field.",point:"d1",shapes:[{type:"run",from:G(.56,.67),to:G(.52,.82)}]}] }
   ]
 },
 {
@@ -298,7 +300,7 @@ const TERMS = [
         {t:0,text:"2 v 2. Ball wide left, a teammate free wide right.",point:"a2",shapes:[{type:"space",at:"a2",r:.1}]},
         {t:1.6,text:"Both defenders pile onto the ball — nobody covers.",point:"d2",shapes:[{type:"space",at:G(.55,.45),r:.12}]},
         {t:2.8,text:"An easy switch finds the free man on the right.",point:"ball",shapes:[{type:"lane",from:"a1",to:"a2"}]},
-        {t:4.4,text:"He drives in and scores; both defenders trail, out of position.",point:"a2"}] },
+        {t:4.4,text:"They drive in and score; both defenders trail, out of position.",point:"a2"}] },
     { kind:"CORRECT", title:"Cover behind",
       desc:"First defender pressures; the second covers the forward pass and intercepts. Then, in possession, a teammate pushes wide to offer an outlet.",
       entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"d1",team:"blue"},{id:"d2",team:"blue"},
@@ -306,17 +308,17 @@ const TERMS = [
       keyframes:[
         {t:0,pos:{gk:G(.5,.06),a1:G(.40,.60),ball:G(.40,.63),a2:G(.62,.55),d1:G(.42,.45),d2:G(.60,.45)}},
         {t:1.4,pos:{d1:G(.42,.56),d2:G(.52,.40)}},
-        {t:2.8,pos:{ball:G(.52,.47),d2:G(.51,.45)}},
-        {t:4.0,pos:{ball:G(.42,.32),d2:G(.43,.33)}},
-        {t:5.4,pos:{d1:G(.13,.46)}},
-        {t:6.4,pos:{ball:G(.17,.46)},ease:"linear"}],
+        {t:2.8,pos:{ball:G(.52,.47),d2:G(.51,.45),a1:G(.46,.52)}},
+        {t:4.0,pos:{ball:G(.42,.32),d2:G(.43,.33),a1:G(.44,.42),a2:G(.55,.48)}},
+        {t:5.4,pos:{d1:G(.13,.46),a1:G(.32,.44),a2:G(.46,.47)}},
+        {t:6.4,pos:{ball:G(.17,.46),a1:G(.27,.45)},ease:"linear"}],
       pauses:[
         {t:0,text:"2 v 2. Watch the second defender.",point:"d2"},
         {t:1.4,text:"First pressures; second drops to COVER the forward lane.",point:"d2",shapes:[{type:"lane",from:"a1",to:"a2"}]},
-        {t:2.8,text:"The through-ball runs straight to the covering defender.",point:"d2"},
-        {t:4.0,text:"Intercepted — now we have possession.",point:"d2"},
+        {t:2.8,text:"The through-ball runs to the covering defender — and the attacker steps toward YOU.",point:"d2"},
+        {t:4.0,text:"Intercepted — now we have possession; the opponents only half-track, standing off.",point:"d2"},
         {t:5.4,text:"A teammate pushes to the wing to offer an outlet.",point:"d1",shapes:[{type:"run",from:G(.42,.56),to:G(.13,.46)}]},
-        {t:6.4,text:"Played out wide — our attack begins.",point:"d1"}] }
+        {t:6.4,text:"Played out wide past the loose pressure — our attack begins.",point:"d1"}] }
   ]
 },
 {
@@ -356,7 +358,7 @@ const TERMS = [
   orientation:"defending", pitch:"two-thirds",
   variants:[
     { kind:"INCORRECT", title:"Ball-watching",
-      desc:"On the wrong side of his man, the defender can only trail the sprinting attacker — never catching up — and concedes.",
+      desc:"On the wrong side of their mark, the defender can only trail the sprinting attacker — never catching up — and concedes.",
       entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"d1",team:"blue",vision:true},{id:"d2",team:"blue"},
         {id:"a1",team:"red"},{id:"a2",team:"red"},{id:"ball",kind:"ball"}],
       keyframes:[
@@ -365,10 +367,10 @@ const TERMS = [
         {t:2.6,pos:{ball:G(.60,.24),a1:G(.64,.20),d1:G(.58,.34)},ease:"linear"},
         {t:3.8,pos:{a1:G(.55,.08),ball:G(.50,.02),d1:G(.58,.26)},ease:"linear"}],
       pauses:[
-        {t:0,text:"Defender is ball-watching, on the wrong side of his man.",point:"d1"},
+        {t:0,text:"Defender is ball-watching, on the wrong side of their mark.",point:"d1"},
         {t:1.4,text:"The attacker spins in behind; the defender trails, a step slow.",point:"a1",shapes:[{type:"run",from:G(.58,.42),to:G(.64,.26)}]},
         {t:2.6,text:"A loose press forces the pass — released in behind.",point:"ball",shapes:[{type:"lane",from:"a2",to:"a1"}]},
-        {t:3.8,text:"Can't catch up — a free run on goal, and he scores.",point:"a1"}] },
+        {t:3.8,text:"Can't catch up — a free run on goal, and they score.",point:"a1"}] },
     { kind:"CORRECT", title:"Stay goal-side",
       desc:"The defender stays between attacker and our goal, tracks the run, and gets to the ball first — while a teammate loosely pressures the passer.",
       entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"d1",team:"blue",vision:true},{id:"d2",team:"blue"},
@@ -380,7 +382,7 @@ const TERMS = [
       pauses:[
         {t:0,text:"Defender stays GOAL-SIDE; a teammate loosely pressures the ball.",point:"d1",shapes:[{type:"lane",from:"d1",to:G(.5,0)}]},
         {t:1.4,text:"Tracks the run, always closer to goal.",point:"d1"},
-        {t:2.6,text:"The forced pass runs to him first — goal protected.",point:"d1",shapes:[{type:"lane",from:"a2",to:"a1"}]}] }
+        {t:2.6,text:"The forced pass runs to them first — goal protected.",point:"d1",shapes:[{type:"lane",from:"a2",to:"a1"}]}] }
   ]
 },
 {
@@ -389,7 +391,7 @@ const TERMS = [
   orientation:"defending", pitch:"two-thirds",
   variants:[
     { kind:"INCORRECT", title:"Diving in",
-      desc:"Outnumbered, the defender dives in and is beaten. He scrambles to trail the attacker but never catches up, and concedes.",
+      desc:"Outnumbered, the defender dives in and is beaten. They scramble to trail the attacker but never catch up, and concede.",
       entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"d1",team:"blue"},{id:"d2",team:"blue"},
         {id:"a1",team:"red"},{id:"ball",kind:"ball"}],
       keyframes:[
@@ -400,7 +402,7 @@ const TERMS = [
       pauses:[
         {t:0,text:"Outnumbered — a teammate is still recovering (far).",point:"d2"},
         {t:1.2,text:"The defender dives in and is beaten.",point:"d1"},
-        {t:2.6,text:"He scrambles to trail the attacker but is a step behind.",point:"d1",shapes:[{type:"run",from:"d1",to:"a1"}]},
+        {t:2.6,text:"They scramble to trail the attacker but are a step behind.",point:"d1",shapes:[{type:"run",from:"d1",to:"a1"}]},
         {t:3.8,text:"Never catches up — the attacker drives in and scores.",point:"a1"}] },
     { kind:"CORRECT", title:"Delay & jockey",
       desc:"The defender jockeys instead of diving in and shows the attacker wide; the recovering defender tucks in toward goal to cover.",
@@ -542,23 +544,24 @@ const TERMS = [
         {t:3.4,pos:{ball:G(.5,.76),a2:G(.5,.76)}}],
       pauses:[
         {t:0,text:"Receiver is square, back to goal, can't see forward.",point:"a1"},
-        {t:1.2,text:"Receives blind with the defender on his back.",point:"d1"},
+        {t:1.2,text:"Receives blind with the defender on their back.",point:"d1"},
         {t:2.4,text:"Pinned — forced to play backward.",point:"a1"},
         {t:3.4,text:"No progress.",point:"a2"}] },
     { kind:"CORRECT", title:"Half turn",
-      desc:"The receiver opens their body before receiving, takes the first touch forward, breaks the line, and plays ahead.",
+      desc:"Before the ball arrives, the receiver (open, side-on) has already scanned the passer, their marker, and the open teammate — so they receive and first-time a through ball into space.",
       entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"a1",team:"red",vision:true},{id:"a2",team:"red"},
         {id:"a3",team:"red"},{id:"d1",team:"blue"},{id:"ball",kind:"ball"}],
       keyframes:[
-        {t:0,pos:{gk:G(.5,.06),a2:G(.5,.78),ball:G(.5,.80),a1:G(.55,.55),d1:G(.5,.48),a3:G(.40,.30)},face:{a1:G(.74,.22)}},
-        {t:1.2,pos:{ball:G(.54,.57),a1:G(.55,.55)},ease:"linear"},
-        {t:2.2,pos:{a1:G(.52,.46),ball:G(.52,.48),d1:G(.5,.50)},face:{a1:G(.45,.10)}},
-        {t:3.2,pos:{ball:G(.42,.32),a3:G(.40,.30)},ease:"linear"}],
+        {t:0,pos:{gk:G(.5,.06),a2:G(.5,.80),ball:G(.5,.82),a1:G(.62,.55),d1:G(.60,.44),a3:G(.25,.30)},face:{a1:G(.22,.48)}},
+        {t:2.6,pos:{a2:G(.5,.80),ball:G(.5,.82),a1:G(.62,.55),d1:G(.60,.44),a3:G(.25,.30)}},
+        {t:3.6,pos:{ball:G(.62,.56),a1:G(.64,.54),d1:G(.66,.50)},face:{a1:G(.30,.36)}},
+        {t:4.8,pos:{ball:G(.26,.28),a3:G(.23,.22)},ease:"linear"}],
       pauses:[
-        {t:0,text:"Receiver opens the body — HALF TURN — to see the whole field.",point:"a1",shapes:[{type:"space",at:"a1",r:.09}]},
-        {t:1.2,text:"Receives side-on, already facing forward.",point:"a1"},
-        {t:2.2,text:"First touch forward — breaks the line past the marker.",point:"a1",shapes:[{type:"run",from:G(.55,.55),to:G(.52,.46)}]},
-        {t:3.2,text:"Plays forward — the attack progresses.",point:"a3",shapes:[{type:"lane",from:"a1",to:"a3"}]}] }
+        {t:0,text:"Open and side-on, YOU scan first: the passer is behind you.",point:"a1",shapes:[{type:"lane",from:"a1",to:"a2"}]},
+        {t:1.0,text:"Your marker is goal-side, tight to you.",point:"a1",shapes:[{type:"lane",from:"a1",to:"d1"}]},
+        {t:2.0,text:"And your teammate is open, downfield to your left.",point:"a1",shapes:[{type:"lane",from:"a1",to:"a3"}]},
+        {t:3.6,text:"You receive on the half-turn — already knowing the marker is there, you cheat right to open the angle.",point:"a1",shapes:[{type:"space",at:"a1",r:.09}]},
+        {t:4.8,text:"First-time through ball into space for your open teammate.",point:"a3",shapes:[{type:"lane",from:"a1",to:"a3"}]}] }
   ]
 }
 ];

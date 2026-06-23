@@ -114,8 +114,9 @@ function onPitch(p){ // allow a little slack for the goal/keeper drawn just beyo
   const g2 = await b.eval(`({t:window.OVFC.S.t, frac:window.OVFC.playFrac()})`);
   check(Math.abs(g2.t-g1.t)<1e-6 && g2.frac>g1.frac+1e-4,
     `gliding bar: during a dwell t is frozen (${g1.t.toFixed(2)}) but the scrub keeps moving (${g1.frac.toFixed(3)}→${g2.frac.toFixed(3)})`);
-  check(g1.step.total===4 && g1.step.cur>=1 && g1.step.cur<=g1.step.total,
-    `step counter: shows cur/total (got ${g1.step.cur} / ${g1.step.total})`);
+  const nStages = await b.eval(`window.OVFC.S.comp.pauses.length`);
+  check(g1.step.total===nStages && g1.step.cur>=1 && g1.step.cur<=g1.step.total,
+    `step counter: shows cur/total (got ${g1.step.cur} / ${g1.step.total}, expected total ${nStages})`);
   // dwellBase=0 ⇒ pp is linear with time (scrub fraction == t/duration)
   await b.eval(`(window.OVFC.S.dwellBase=0, window.OVFC.selectById("press",1), window.OVFC.seekFraction(0.5), 1)`);
   const lin = await b.eval(`({frac:window.OVFC.playFrac(), t:window.OVFC.S.t, dur:window.OVFC.S.comp.duration})`);
