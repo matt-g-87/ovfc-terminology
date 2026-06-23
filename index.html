@@ -640,69 +640,89 @@ function readableOn(hex){ const c=hex.replace('#',''); const r=parseInt(c.slice(
   return (0.299*r+0.587*g+0.114*b)/255 > 0.62 ? "#10202e" : "#fff"; }
 
 /* ----- playback state -----
-   Auto-cycle: play() runs a single virtual clock and starts MOVING immediately. When the
-   clock ARRIVES at a later stage (a pause) it HOLDS for `dwellBase` virtual seconds, then
-   resumes — so dwell wall-time is dwellBase/speed (inverse scaling). It stops at the end
-   (no loop). Forward/Back (nextStage/prevStage) animate a glide to the adjacent stage via
-   `seekTarget` and park there (no dwell). dwellBase is test-overridable. */
+   The scrub runs on a "play position" pp that INCLUDES the dwells: the timeline is built
+   from alternating move-segments (pp↔t linear) and zero-width-in-t dwell-segments (length
+   dwellBase) at each interior stage. Auto-play advances pp at real speed, so the thumb keeps
+   gliding even while the players are held on a stage; pp→t derives the on-pitch position
+   (frozen during a dwell). Forward/Back glide in t-space (motion-paced) toward the adjacent
+   stage and park. dwellBase is test-overridable (0 ⇒ pp==t, linear). */
 const EPS = 0.001;
-const S = { term:null, vIndex:0, comp:null, t:0, playing:false, speed:1, scrubbing:false,
-  lastNow:null, colors:loadColors(), dwellLeft:0, dwellBase:8, seekTarget:null };
+const S = { term:null, vIndex:0, comp:null, t:0, pp:0, playing:false, speed:1, scrubbing:false,
+  lastNow:null, colors:loadColors(), dwellBase:8, seekTarget:null };
+
+function buildPP(comp){               // build the pp segment map using the current dwellBase
+  const dur=comp.duration, db=S.dwellBase;
+  const dwellTs=comp.pauses.map(p=>p.t).filter(t=>t>EPS && t<dur-EPS);
+  const segs=[]; let pp=0, prevT=0;
+  for(const dt of dwellTs){
+    if(dt>prevT){ segs.push({type:'move',pp0:pp,pp1:pp+(dt-prevT),t0:prevT,t1:dt}); pp+=dt-prevT; }
+    if(db>0){ segs.push({type:'dwell',pp0:pp,pp1:pp+db,t0:dt,t1:dt}); pp+=db; }
+    prevT=dt;
+  }
+  segs.push({type:'move',pp0:pp,pp1:pp+Math.max(0,dur-prevT),t0:prevT,t1:dur}); pp+=Math.max(0,dur-prevT);
+  comp.segs=segs; comp.ppTotal=pp||1e-6;
+}
+function segAt(comp,pp){ for(const s of comp.segs) if(pp<=s.pp1+1e-9) return s; return comp.segs[comp.segs.length-1]; }
+function ppToT(comp,pp){
+  pp=Math.max(0,Math.min(comp.ppTotal,pp));
+  const s=segAt(comp,pp); if(s.type==='dwell') return s.t0;
+  const f=(s.pp1-s.pp0)?(pp-s.pp0)/(s.pp1-s.pp0):0; return s.t0+f*(s.t1-s.t0);
+}
+function tToPp(comp,t){               // map a time to the pp where the playhead first reaches it
+  t=Math.max(0,Math.min(comp.duration,t));
+  for(const s of comp.segs){ if(s.type!=='move') continue;
+    if(t<=s.t1+1e-9){ const f=(s.t1-s.t0)?(t-s.t0)/(s.t1-s.t0):0; return s.pp0+f*(s.pp1-s.pp0); } }
+  return comp.ppTotal;
+}
+function playFrac(){ return S.comp&&S.comp.ppTotal ? S.pp/S.comp.ppTotal : 0; }
 
 function loadVariant(term,vIndex){
   S.term=term; S.vIndex=vIndex; S.comp=compileVariant(term.variants[vIndex]);
-  S.t=0; S.playing=false; S.dwellLeft=0; S.seekTarget=null;
-  buildTabs(); updateDesc(); updatePlayBtn(); render();
+  buildPP(S.comp);
+  S.t=0; S.pp=0; S.playing=false; S.seekTarget=null;
+  buildTabs(); updateDesc(); updatePlayBtn(); setScrubTicks(); render();
 }
 function play(){
   if(!S.comp) return;
-  if(S.t>=S.comp.duration-1e-6) S.t=0;        // replay from start at the end
-  S.dwellLeft=0; S.seekTarget=null;           // start MOVING right away (no opening dwell)
-  S.playing=true; updatePlayBtn();
+  if(S.pp>=S.comp.ppTotal-1e-6) S.pp=0;        // replay from start at the end
+  S.seekTarget=null;
+  const seg=segAt(S.comp,S.pp);                // if parked on a dwell, skip its hold so we move now
+  if(seg.type==='dwell') S.pp=seg.pp1;
+  S.t=ppToT(S.comp,S.pp); S.playing=true; updatePlayBtn();
 }
 function pause(){ S.playing=false; S.seekTarget=null; updatePlayBtn(); }
 function togglePlay(){ S.playing?pause():play(); }
 function tick(realDt){
   if(!S.playing || !S.comp) return;
   const vdt=realDt*S.speed;
-  // animated Forward/Back: glide to the target stage (forward or reverse), then park
+  // Forward/Back: motion-paced glide in t-space to the target stage, then park
   if(S.seekTarget!=null){
     const dir = S.seekTarget>=S.t ? 1 : -1;
     let nt = S.t + dir*vdt;
     if((dir>0 && nt>=S.seekTarget) || (dir<0 && nt<=S.seekTarget)){ nt=S.seekTarget; S.seekTarget=null; S.playing=false; }
-    S.t=Math.max(0,Math.min(S.comp.duration,nt)); updatePlayBtn(); return;
+    S.t=Math.max(0,Math.min(S.comp.duration,nt)); S.pp=tToPp(S.comp,S.t); updatePlayBtn(); return;
   }
-  if(S.dwellLeft>0){                                       // holding on a stage during auto-cycle
-    S.dwellLeft-=vdt;
-    if(S.dwellLeft<=0){ S.dwellLeft=0;
-      const p=pauseAt(S.comp,S.t);                         // step just past it so it won't re-fire
-      if(p) S.t=Math.min(S.comp.duration, p.t+EPS);
-    }
-    return;
-  }
-  const prev=S.t; let nt=S.t+vdt;
-  let hit=null;
-  for(const p of S.comp.pauses){ if(p.t>prev && p.t<=nt){ hit=p; break; } }
-  if(hit){ nt=hit.t; S.dwellLeft=S.dwellBase; }            // arrive at a stage → dwell (stay playing)
-  if(nt>=S.comp.duration){ nt=S.comp.duration; S.playing=false; S.dwellLeft=0; }
-  S.t=nt;
+  // auto-play: advance pp (which includes dwell time) → gliding thumb; pp→t freezes on dwells
+  S.pp+=vdt;
+  if(S.pp>=S.comp.ppTotal){ S.pp=S.comp.ppTotal; S.playing=false; }
+  S.t=ppToT(S.comp,S.pp);
 }
 function seekFraction(f){
   if(!S.comp) return;
-  S.playing=false; S.dwellLeft=0; S.seekTarget=null;
-  S.t=Math.max(0,Math.min(1,f))*S.comp.duration;
+  S.playing=false; S.seekTarget=null;
+  S.pp=Math.max(0,Math.min(1,f))*S.comp.ppTotal; S.t=ppToT(S.comp,S.pp);
 }
 function nextStage(){          // animate forward to the next stage, then park
   if(!S.comp) return;
   const p=S.comp.pauses.find(p=>p.t>S.t+EPS);
   S.seekTarget = p ? p.t : S.comp.duration;
-  S.dwellLeft=0; S.playing=true; updatePlayBtn();
+  S.playing=true; updatePlayBtn();
 }
 function prevStage(){          // animate back to the previous stage, then park
   if(!S.comp) return;
   let target=0;
   for(const p of S.comp.pauses){ if(p.t<S.t-EPS) target=p.t; else break; }
-  S.seekTarget=target; S.dwellLeft=0; S.playing=true; updatePlayBtn();
+  S.seekTarget=target; S.playing=true; updatePlayBtn();
 }
 
 /* ========================================================== RENDER =========== */
@@ -871,8 +891,15 @@ function render(){
     annoEl.querySelector('.badge').textContent = kind==="CORRECT"?"CORRECT":"INCORRECT";
     annoEl.className="anno show "+topAnno+" "+(kind==="CORRECT"?"goodbadge":"badbadge");
   } else { annoEl.className="anno "+topAnno; }
-  if(!S.scrubbing){ scrub.value = S.comp.duration? (S.t/S.comp.duration):0; }
-  timeEl.textContent = `${S.t.toFixed(1)} / ${S.comp.duration.toFixed(1)}s`;
+  if(!S.scrubbing){ scrub.value = playFrac(); }      // pp-based → thumb glides through dwells
+  const si=stepInfo();
+  timeEl.textContent = si.total ? `${si.cur} / ${si.total}` : "—";
+}
+// current stage / total stages (a "stage" is a pause); cur = stages reached so far (min 1)
+function stepInfo(){
+  if(!S.comp || !S.comp.pauses.length) return {cur:0,total:0};
+  let cur=0; for(const p of S.comp.pauses) if(p.t<=S.t+EPS) cur++;
+  return {cur:Math.max(1,cur), total:S.comp.pauses.length};
 }
 
 /* ========================================================== UI ============== */
@@ -941,10 +968,25 @@ function updateDesc(){
   descEl.innerHTML=`<span class="vtitle">${v.kind==="CORRECT"?"✔ ":"✖ "}${v.title}.</span>${v.desc}`;
 }
 function updatePlayBtn(){ playBtn.textContent = S.playing? "⏸":"▶"; }
+// paint orange stage markers (the Forward/Back jump points) onto the scrub track
+function setScrubTicks(){
+  if(!S.comp) return;
+  const marks=S.comp.pauses.map(p=>(tToPp(S.comp,p.t)/S.comp.ppTotal)*100).sort((a,b)=>a-b);
+  const w=0.7;                                  // half-width of each tick, %
+  let g='linear-gradient(90deg', cur=0;
+  for(const m of marks){
+    const a=Math.max(0,m-w), b=Math.min(100,m+w);
+    if(a<cur) continue;
+    g+=`,#2a3a4d ${cur}%,#2a3a4d ${a}%,#f0a32a ${a}%,#f0a32a ${b}%`;
+    cur=b;
+  }
+  g+=`,#2a3a4d ${cur}%,#2a3a4d 100%)`;
+  scrub.style.background=g;
+}
 
 /* events */
 playBtn.onclick=togglePlay;
-document.getElementById('restart').onclick=()=>{ S.t=0; S.playing=false; S.dwellLeft=0; S.seekTarget=null; updatePlayBtn(); render(); };
+document.getElementById('restart').onclick=()=>{ S.t=0; S.pp=0; S.playing=false; S.seekTarget=null; updatePlayBtn(); render(); };
 document.getElementById('prevStage').onclick=prevStage;
 document.getElementById('nextStage').onclick=nextStage;
 scrub.addEventListener('pointerdown',()=>S.scrubbing=true);
@@ -983,7 +1025,7 @@ function frame(now){
         and support deep-links like #term=press&v=1&t=2.4&play ---- */
 window.OVFC = {
   TERMS, get S(){return S;}, compileVariant, samplePos, pauseAt, tick, seekFraction,
-  play, pause, nextStage, prevStage, loadVariant, render,
+  play, pause, nextStage, prevStage, loadVariant, render, stepInfo, playFrac, sampleFace,
   // drive the clock deterministically without rAF (for tests); honours the auto-cycle model
   step(dt){ tick(dt); render(); },
   // current positions of every entity, plus clock info — what tests assert on
