@@ -357,10 +357,10 @@ const TERMS = [
   variants:[
     { kind:"INCORRECT", title:"Ball-watching",
       desc:"On the wrong side of his man, the defender can only trail the sprinting attacker — never catching up — and concedes.",
-      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"d1",team:"blue"},{id:"d2",team:"blue"},
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"d1",team:"blue",vision:true},{id:"d2",team:"blue"},
         {id:"a1",team:"red"},{id:"a2",team:"red"},{id:"ball",kind:"ball"}],
       keyframes:[
-        {t:0,pos:{gk:G(.5,.06),a2:G(.18,.52),ball:G(.18,.54),d2:G(.28,.50),a1:G(.58,.42),d1:G(.52,.47)}},
+        {t:0,pos:{gk:G(.5,.06),a2:G(.18,.52),ball:G(.18,.54),d2:G(.28,.50),a1:G(.58,.42),d1:G(.52,.47)},face:{d1:G(.18,.53)}},
         {t:1.4,pos:{a1:G(.64,.26),d1:G(.56,.40),d2:G(.26,.48)}},
         {t:2.6,pos:{ball:G(.60,.24),a1:G(.64,.20),d1:G(.58,.34)},ease:"linear"},
         {t:3.8,pos:{a1:G(.55,.08),ball:G(.50,.02),d1:G(.58,.26)},ease:"linear"}],
@@ -371,11 +371,11 @@ const TERMS = [
         {t:3.8,text:"Can't catch up — a free run on goal, and he scores.",point:"a1"}] },
     { kind:"CORRECT", title:"Stay goal-side",
       desc:"The defender stays between attacker and our goal, tracks the run, and gets to the ball first — while a teammate loosely pressures the passer.",
-      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"d1",team:"blue"},{id:"d2",team:"blue"},
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"d1",team:"blue",vision:true},{id:"d2",team:"blue"},
         {id:"a1",team:"red"},{id:"a2",team:"red"},{id:"ball",kind:"ball"}],
       keyframes:[
-        {t:0,pos:{gk:G(.5,.06),a2:G(.18,.52),ball:G(.18,.54),d2:G(.28,.50),a1:G(.58,.42),d1:G(.56,.32)}},
-        {t:1.4,pos:{a1:G(.62,.34),d1:G(.60,.27),d2:G(.26,.48)}},
+        {t:0,pos:{gk:G(.5,.06),a2:G(.18,.52),ball:G(.18,.54),d2:G(.28,.50),a1:G(.58,.42),d1:G(.56,.32)},face:{d1:G(.40,.48)}},
+        {t:1.4,pos:{a1:G(.62,.34),d1:G(.60,.27),d2:G(.26,.48)},face:{d1:G(.45,.42)}},
         {t:2.6,pos:{ball:G(.54,.30),d1:G(.54,.27)},ease:"linear"}],
       pauses:[
         {t:0,text:"Defender stays GOAL-SIDE; a teammate loosely pressures the ball.",point:"d1",shapes:[{type:"lane",from:"d1",to:G(.5,0)}]},
@@ -463,10 +463,10 @@ const TERMS = [
   variants:[
     { kind:"INCORRECT", title:"Forcing the crowded side",
       desc:"The attacker tries to beat two defenders solo on the busy side; they gang up and win it — while a teammate stays wide open.",
-      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"a1",team:"red"},{id:"a2",team:"red"},
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"a1",team:"red",vision:true},{id:"a2",team:"red"},
         {id:"d1",team:"blue"},{id:"d2",team:"blue"},{id:"ball",kind:"ball"}],
       keyframes:[
-        {t:0,pos:{gk:G(.5,.06),a1:G(.80,.60),ball:G(.80,.62),d1:G(.72,.52),d2:G(.64,.58),a2:G(.18,.50)}},
+        {t:0,pos:{gk:G(.5,.06),a1:G(.80,.60),ball:G(.80,.62),d1:G(.72,.52),d2:G(.64,.58),a2:G(.18,.50)},face:{a1:G(.86,.15)}},
         {t:1.2,pos:{a1:G(.82,.46),ball:G(.82,.48),d1:G(.78,.44),d2:G(.70,.50)}},
         {t:2.4,pos:{a1:G(.74,.42),ball:G(.74,.44),d1:G(.74,.40),d2:G(.70,.46)}},
         {t:3.6,pos:{ball:G(.72,.45),d1:G(.73,.43),a1:G(.78,.44)}}],
@@ -477,11 +477,11 @@ const TERMS = [
         {t:3.6,text:"Crowded out and dispossessed — the free man was never used.",point:"a2",shapes:[{type:"lane",from:"a1",to:"a2"}]}] },
     { kind:"CORRECT", title:"Switch the play",
       desc:"Carry up the right to draw the defenders (a third drops to cover), then switch to the free far-side player, who attacks the open space.",
-      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"a1",team:"red"},{id:"a2",team:"red"},
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"a1",team:"red",vision:true},{id:"a2",team:"red"},
         {id:"d1",team:"blue"},{id:"d2",team:"blue"},{id:"d3",team:"blue"},{id:"ball",kind:"ball"}],
       keyframes:[
-        {t:0,pos:{gk:G(.5,.06),a1:G(.82,.58),ball:G(.82,.60),d1:G(.76,.46),d2:G(.66,.50),d3:G(.50,.40),a2:G(.18,.52)}},
-        {t:1.4,pos:{a1:G(.82,.46),ball:G(.82,.48),d1:G(.78,.42),d2:G(.70,.46)}},
+        {t:0,pos:{gk:G(.5,.06),a1:G(.82,.58),ball:G(.82,.60),d1:G(.76,.46),d2:G(.66,.50),d3:G(.50,.40),a2:G(.18,.52)},face:{a1:G(.80,.30)}},
+        {t:1.4,pos:{a1:G(.82,.46),ball:G(.82,.48),d1:G(.78,.42),d2:G(.70,.46)},face:{a1:G(.20,.50)}},
         {t:2.2,pos:{ball:G(.5,.52)},ease:"linear"},
         {t:3.0,pos:{ball:G(.22,.52),a2:G(.20,.52),d2:G(.55,.50),d3:G(.45,.46)}},
         {t:4.2,pos:{a2:G(.20,.34),ball:G(.20,.36)}}],
@@ -850,12 +850,19 @@ function drawVision(){
     const pp=samplePos(S.comp,e.id,S.t);
     const pc=project(pp[0],pp[1]), tc=project(ft[0],ft[1]);
     const ang=Math.atan2(tc[1]-pc[1],tc[0]-pc[0]); if(!isFinite(ang)) continue;
-    const half=(120*Math.PI/180)/2, rad=0.17*rect.w;
+    const half=(120*Math.PI/180)/2, rad=0.18*rect.w;
     ctx.save();
+    // high-contrast cyan fill so it reads over the green turf
     const grd=ctx.createRadialGradient(pc[0],pc[1],4,pc[0],pc[1],rad);
-    grd.addColorStop(0,"rgba(255,238,140,.34)"); grd.addColorStop(1,"rgba(255,238,140,0)");
+    grd.addColorStop(0,"rgba(150,225,255,.62)"); grd.addColorStop(1,"rgba(120,205,255,0)");
     ctx.fillStyle=grd;
     ctx.beginPath(); ctx.moveTo(pc[0],pc[1]); ctx.arc(pc[0],pc[1],rad,ang-half,ang+half); ctx.closePath(); ctx.fill();
+    // bright outline (two edges + far arc) for clear definition
+    ctx.lineWidth=2; ctx.strokeStyle="rgba(220,245,255,.9)";
+    ctx.beginPath(); ctx.moveTo(pc[0],pc[1]);
+    ctx.lineTo(pc[0]+Math.cos(ang-half)*rad, pc[1]+Math.sin(ang-half)*rad);
+    ctx.arc(pc[0],pc[1],rad,ang-half,ang+half);
+    ctx.closePath(); ctx.stroke();
     ctx.restore();
   }
 }
