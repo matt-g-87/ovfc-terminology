@@ -14,6 +14,7 @@ const fails = [];
 function check(cond, msg){ if(cond){ passed++; } else { failed++; fails.push(msg); console.log('  ✗ '+msg); } }
 function ok(msg){ passed++; }
 
+const wait = ms => new Promise(r=>setTimeout(r,ms));   // real wall-clock; lets the page's rAF run
 function finite(p){ return Array.isArray(p) && p.length===2 && Number.isFinite(p[0]) && Number.isFinite(p[1]); }
 function onPitch(p){ // allow a little slack for the goal/keeper drawn just beyond the line
   return p[0] >= -0.1 && p[0] <= 1.1 && p[1] >= -0.12 && p[1] <= 1.12;
@@ -64,23 +65,45 @@ function onPitch(p){ // allow a little slack for the goal/keeper drawn just beyo
   }
   await b.eval(`(window.OVFC.S.dwellBase=8, 1)`);  // restore default for the dwell/step checks
 
-  // 1b) Auto-cycle dwell + Forward/Back stepping (new playback model).
+  // 1b) Auto-cycle dwell: play starts MOVING immediately, then HOLDS on the first stage it
+  //     ARRIVES at (not the t=0 start). Driven via step() in virtual time.
   await b.eval(`(window.OVFC.selectById("press",1), window.OVFC.S.dwellBase=8, 1)`);
   const pauses = await b.eval(`window.OVFC.S.comp.pauses.map(p=>p.t)`);
-  // play, then step the clock past the first stage; with an 8s dwell it must HOLD there
+  const firstStage = pauses.find(p=>p>1e-3);
   await b.eval(`(window.OVFC.play(), 1)`);
-  for(let i=0;i<40;i++) await b.eval(`(window.OVFC.step(0.05), 1)`);  // ~2s of virtual time
+  for(let i=0;i<60;i++) await b.eval(`(window.OVFC.step(0.05), 1)`);  // ~3s of virtual time
   const held = await b.eval(`window.OVFC.snapshot()`);
-  check(Math.abs(held.t - pauses[0]) < 0.2 && held.playing===true && held.activePause!==null,
-    `dwell: auto-cycle holds on a stage during the 8s dwell (t≈${pauses[0]})`);
-  // nextStage/prevStage land exactly on stage times and pause
-  await b.eval(`(window.OVFC.seekFraction(0), window.OVFC.nextStage(), 1)`);
-  const ns = await b.eval(`window.OVFC.snapshot()`);
-  check(Math.abs(ns.t - pauses.find(p=>p>1e-3)) < 1e-6 && ns.playing===false,
-    `nextStage lands on the next stage and pauses`);
+  check(Math.abs(held.t - firstStage) < 0.2 && held.playing===true && held.activePause!==null,
+    `dwell: auto-cycle moves off t=0 and holds on the first arrived stage (t≈${firstStage})`);
+
+  // 1c) REAL playback through requestAnimationFrame, in wall-clock time — this is what the
+  //     play BUTTON actually does. Catches "play does nothing" (the bug the unit path missed).
+  await b.eval(`(window.OVFC.S.dwellBase=8, window.OVFC.selectById("touch-tight",0), window.OVFC.seekFraction(0), 1)`);
+  await b.eval(`(window.OVFC.play(), 1)`);
+  await wait(900);
+  const live = await b.eval(`window.OVFC.snapshot()`);
+  check(live.t > 0.2 && live.playing===true,
+    `REAL play: pressing play advances the clock via rAF within ~1s (t=${live.t.toFixed(2)})`);
+
+  // 1d) Forward/Back ANIMATE the transition (live render), not an instant jump.
+  await b.eval(`(window.OVFC.pause(), window.OVFC.seekFraction(0), 1)`);
+  const stages = await b.eval(`window.OVFC.S.comp.pauses.map(p=>p.t)`);
+  const target1 = stages.find(p=>p>1e-3);
+  await b.eval(`(window.OVFC.nextStage(), 1)`);
+  await wait(80);                                   // shortly after: should be MID-glide
+  const mid = await b.eval(`window.OVFC.S.t`);
+  check(mid>1e-3 && mid<target1-1e-3,
+    `Forward animates: mid-transition t (${mid.toFixed(2)}) is between start and stage ${target1}`);
+  await wait(1500);                                 // allow arrival
+  const landed = await b.eval(`window.OVFC.snapshot()`);
+  check(Math.abs(landed.t-target1)<0.06 && landed.playing===false,
+    `Forward lands on the next stage and parks (t≈${target1})`);
+  // Back animates in reverse and parks at the previous stage (t=0 here)
   await b.eval(`(window.OVFC.prevStage(), 1)`);
-  const ps = await b.eval(`window.OVFC.snapshot()`);
-  check(ps.t < ns.t && ps.playing===false, `prevStage steps back and pauses`);
+  await wait(1500);
+  const backLanded = await b.eval(`window.OVFC.snapshot()`);
+  check(backLanded.t < target1-0.05 && backLanded.playing===false,
+    `Back animates in reverse and parks at the previous stage (t=${backLanded.t.toFixed(2)})`);
 
   // 2) Scrubbing to arbitrary times never throws and stays on-pitch (seek path).
   await b.eval(`(window.OVFC.selectById("touch-tight",0),1)`);

@@ -640,34 +640,39 @@ function readableOn(hex){ const c=hex.replace('#',''); const r=parseInt(c.slice(
   return (0.299*r+0.587*g+0.114*b)/255 > 0.62 ? "#10202e" : "#fff"; }
 
 /* ----- playback state -----
-   Auto-cycle model: play() runs a single virtual clock. On reaching a stage (a pause) the
-   clock HOLDS for `dwellBase` virtual seconds, then resumes automatically — so dwell wall-time
-   is dwellBase/speed (inverse scaling). At the final stage it stops (no loop). Forward/Back
-   (nextStage/prevStage) jump between stages and park. dwellBase is test-overridable. */
+   Auto-cycle: play() runs a single virtual clock and starts MOVING immediately. When the
+   clock ARRIVES at a later stage (a pause) it HOLDS for `dwellBase` virtual seconds, then
+   resumes — so dwell wall-time is dwellBase/speed (inverse scaling). It stops at the end
+   (no loop). Forward/Back (nextStage/prevStage) animate a glide to the adjacent stage via
+   `seekTarget` and park there (no dwell). dwellBase is test-overridable. */
 const EPS = 0.001;
 const S = { term:null, vIndex:0, comp:null, t:0, playing:false, speed:1, scrubbing:false,
-  lastNow:null, colors:loadColors(), dwellLeft:0, dwellBase:8 };
+  lastNow:null, colors:loadColors(), dwellLeft:0, dwellBase:8, seekTarget:null };
 
 function loadVariant(term,vIndex){
   S.term=term; S.vIndex=vIndex; S.comp=compileVariant(term.variants[vIndex]);
-  S.t=0; S.playing=false; S.dwellLeft=0;
+  S.t=0; S.playing=false; S.dwellLeft=0; S.seekTarget=null;
   buildTabs(); updateDesc(); updatePlayBtn(); render();
 }
 function play(){
   if(!S.comp) return;
-  if(S.t>=S.comp.duration-1e-6){ S.t=0; S.dwellLeft=0; }   // replay from start at the end
-  S.playing=true;
-  // if parked exactly on a stage, hold it first so the annotation is read before moving
-  const p=pauseAt(S.comp,S.t);
-  if(p && S.dwellLeft<=0) S.dwellLeft=S.dwellBase;
-  updatePlayBtn();
+  if(S.t>=S.comp.duration-1e-6) S.t=0;        // replay from start at the end
+  S.dwellLeft=0; S.seekTarget=null;           // start MOVING right away (no opening dwell)
+  S.playing=true; updatePlayBtn();
 }
-function pause(){ S.playing=false; updatePlayBtn(); }    // freeze; keep dwellLeft
+function pause(){ S.playing=false; S.seekTarget=null; updatePlayBtn(); }
 function togglePlay(){ S.playing?pause():play(); }
 function tick(realDt){
   if(!S.playing || !S.comp) return;
   const vdt=realDt*S.speed;
-  if(S.dwellLeft>0){                                       // holding on a stage
+  // animated Forward/Back: glide to the target stage (forward or reverse), then park
+  if(S.seekTarget!=null){
+    const dir = S.seekTarget>=S.t ? 1 : -1;
+    let nt = S.t + dir*vdt;
+    if((dir>0 && nt>=S.seekTarget) || (dir<0 && nt<=S.seekTarget)){ nt=S.seekTarget; S.seekTarget=null; S.playing=false; }
+    S.t=Math.max(0,Math.min(S.comp.duration,nt)); updatePlayBtn(); return;
+  }
+  if(S.dwellLeft>0){                                       // holding on a stage during auto-cycle
     S.dwellLeft-=vdt;
     if(S.dwellLeft<=0){ S.dwellLeft=0;
       const p=pauseAt(S.comp,S.t);                         // step just past it so it won't re-fire
@@ -684,20 +689,20 @@ function tick(realDt){
 }
 function seekFraction(f){
   if(!S.comp) return;
-  S.playing=false; S.dwellLeft=0;
+  S.playing=false; S.dwellLeft=0; S.seekTarget=null;
   S.t=Math.max(0,Math.min(1,f))*S.comp.duration;
 }
-function nextStage(){
+function nextStage(){          // animate forward to the next stage, then park
   if(!S.comp) return;
   const p=S.comp.pauses.find(p=>p.t>S.t+EPS);
-  S.t = p ? p.t : S.comp.duration;
-  S.playing=false; S.dwellLeft=0; updatePlayBtn(); render();
+  S.seekTarget = p ? p.t : S.comp.duration;
+  S.dwellLeft=0; S.playing=true; updatePlayBtn();
 }
-function prevStage(){
+function prevStage(){          // animate back to the previous stage, then park
   if(!S.comp) return;
   let target=0;
   for(const p of S.comp.pauses){ if(p.t<S.t-EPS) target=p.t; else break; }
-  S.t=target; S.playing=false; S.dwellLeft=0; updatePlayBtn(); render();
+  S.seekTarget=target; S.dwellLeft=0; S.playing=true; updatePlayBtn();
 }
 
 /* ========================================================== RENDER =========== */
@@ -939,7 +944,7 @@ function updatePlayBtn(){ playBtn.textContent = S.playing? "⏸":"▶"; }
 
 /* events */
 playBtn.onclick=togglePlay;
-document.getElementById('restart').onclick=()=>{ S.t=0; S.playing=false; S.dwellLeft=0; updatePlayBtn(); render(); };
+document.getElementById('restart').onclick=()=>{ S.t=0; S.playing=false; S.dwellLeft=0; S.seekTarget=null; updatePlayBtn(); render(); };
 document.getElementById('prevStage').onclick=prevStage;
 document.getElementById('nextStage').onclick=nextStage;
 scrub.addEventListener('pointerdown',()=>S.scrubbing=true);
