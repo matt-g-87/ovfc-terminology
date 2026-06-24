@@ -219,15 +219,13 @@ const TERMS = [
       keyframes:[
         {t:0,pos:{gk:G(.5,.06),d1:G(.42,.30),a1:G(.5,.42),a2:G(.80,.55),d2:G(.74,.48),thr:G(.02,.42),ball:G(.03,.42)}},
         {t:1.4,pos:{ball:G(.5,.44),thr:G(.10,.44)},ease:"linear"},
-        {t:2.6,pos:{d1:G(.45,.20)}},
-        {t:3.6,pos:{a1:G(.5,.30),ball:G(.5,.32)}},
-        {t:4.8,pos:{a1:G(.46,.12),ball:G(.42,.02)},ease:"linear"}],
+        {t:2.8,pos:{d1:G(.47,.27),d2:G(.74,.43),a1:G(.57,.34),ball:G(.57,.36),a2:G(.83,.40),thr:G(.22,.34)}},
+        {t:4.0,pos:{a1:G(.57,.24),ball:G(.58,.00)},ease:"linear"}],
       pauses:[
         {t:0,text:"Opponent throw-in. Watch how far off the defender is.",point:"d1"},
         {t:1.4,text:"The receiver simply controls the ball — unpressured.",point:"a1"},
-        {t:2.6,text:"The defender even backs off toward goal — far too much space.",point:"d1",shapes:[{type:"space",at:"a1",r:.12}]},
-        {t:3.6,text:"Unmarked, the attacker walks the ball in…",point:"a1"},
-        {t:4.8,text:"…and finishes hard into the left corner.",point:"a1"}] },
+        {t:2.8,text:"Unopposed: the attackers now have several passing options.",point:"a1",shapes:[{type:"lane",from:"a1",to:"a2"},{type:"space",at:"a1",r:.1}]},
+        {t:4.0,text:"Hard to defend — many options to score; they finish to the keeper's right.",point:"a1"}] },
     { kind:"INCORRECT", title:"Marking the zone",
       desc:"The defender guards space, not the player. Once beaten they trail the attacker but can't keep up.",
       throwIn:{side:"left",label:"Opponent Throw",until:1.4},
@@ -239,24 +237,29 @@ const TERMS = [
         {t:2.8,pos:{a1:G(.59,.27),ball:G(.59,.29),d1:G(.33,.29)}},
         {t:4.2,pos:{a1:G(.56,.10),ball:G(.58,.02),d1:G(.33,.29)},ease:"linear"}],
       pauses:[
-        {t:0,text:"The defender marks the ZONE, not the player.",point:"d1"},
-        {t:1.4,text:"The attacker receives, unmarked.",point:"a1"},
+        {t:0,text:"The defender marks the ZONE (dashed) — not the player.",point:"d1",shapes:[{type:"space",at:"d1",r:.18}]},
+        {t:1.4,text:"They hold the zone; the attacker receives, unmarked.",point:"a1",shapes:[{type:"space",at:"d1",r:.18}]},
         {t:2.8,text:"The attacker carries to the right; the zonal defender barely shifts and never picks them up.",point:"d1",shapes:[{type:"space",at:"a1",r:.1}]},
         {t:4.2,text:"Free to run in and finish to the keeper's right.",point:"a1"}] },
     { kind:"CORRECT", title:"Touch tight",
-      desc:"Goal-side and within a stride, between attacker and ball. The receiver gets no time and is forced backward.",
-      throwIn:{side:"left",label:"Opponent Throw",until:1.4},
-      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"d1",team:"blue"},
+      desc:"Before the throw the attacker tries to shake the marker, but the defender keeps eyes on them and stays a stride away, goal-side — so the receiver gets no time and is forced backward.",
+      throwIn:{side:"left",label:"Opponent Throw",until:3.4},
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"d1",team:"blue",vision:true},
         {id:"a1",team:"red"},{id:"a2",team:"red"},{id:"d2",team:"blue"},{id:"thr",team:"red"},{id:"ball",kind:"ball"}],
       keyframes:[
-        {t:0,pos:{gk:G(.5,.06),d1:G(.5,.40),a1:G(.5,.44),a2:G(.80,.55),d2:G(.74,.48),thr:G(.02,.42),ball:G(.03,.42)}},
-        {t:1.4,pos:{ball:G(.5,.50),thr:G(.10,.44)},ease:"linear"},
-        {t:2.8,pos:{a1:G(.5,.54),ball:G(.5,.57),d1:G(.5,.49)}},
-        {t:4.0,pos:{ball:G(.72,.58)}}],
+        {t:0,pos:{gk:G(.5,.06),d1:G(.50,.40),a1:G(.52,.45),a2:G(.80,.55),d2:G(.74,.48),thr:G(.02,.45),ball:G(.03,.45)},face:{d1:G(.52,.45)}},
+        {t:1.2,pos:{a1:G(.36,.46),d1:G(.38,.41)},face:{d1:G(.36,.46)}},
+        {t:2.4,pos:{a1:G(.62,.50),d1:G(.60,.45)},face:{d1:G(.62,.50)}},
+        {t:3.4,pos:{ball:G(.60,.50),thr:G(.10,.47)},ease:"linear"},
+        {t:4.4,pos:{a1:G(.62,.56),ball:G(.62,.58),d1:G(.60,.51)},face:{d1:G(.62,.56)}},
+        {t:5.4,pos:{ball:G(.80,.58)}}],
       pauses:[
-        {t:0,text:"Touch tight: a stride away, goal-side, between attacker and goal.",point:"d1"},
-        {t:2.8,text:"No time, no space — the attacker can't turn and shields the ball.",point:"a1"},
-        {t:4.0,text:"Forced backward. The attack is shut down.",point:"a1"}] }
+        {t:0,text:"Touch tight: goal-side, within a stride — eyes locked on the attacker.",point:"d1"},
+        {t:1.2,text:"The attacker darts one way to shake the marker…",point:"a1",shapes:[{type:"run",from:G(.52,.45),to:G(.36,.46)}]},
+        {t:2.4,text:"…then the other — but wherever they go, the defender stays glued, eyes on them.",point:"d1",shapes:[{type:"run",from:G(.36,.46),to:G(.62,.50)}]},
+        {t:3.4,text:"The throw arrives — no time, no space.",point:"a1"},
+        {t:4.4,text:"Pinned — the receiver can only shield.",point:"a1"},
+        {t:5.4,text:"Forced backward. The attack is shut down.",point:"a1"}] }
   ]
 },
 {
@@ -342,6 +345,7 @@ const TERMS = [
   variants:[
     { kind:"INCORRECT", title:"Spread out at a corner",
       desc:"Defending a corner with the unit spread far from goal: the cross finds a free attacker, a simple pass beats the non-existent block, and it's tapped in.",
+      cornerKick:{label:"Corner Kick",until:1.6},
       entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},
         {id:"d1",team:"blue"},{id:"d2",team:"blue"},{id:"d3",team:"blue"},{id:"d4",team:"blue"},{id:"d5",team:"blue"},
         {id:"a1",team:"red"},{id:"a2",team:"red"},{id:"a3",team:"red"},{id:"a4",team:"red"},{id:"a5",team:"red"},
@@ -349,7 +353,7 @@ const TERMS = [
       keyframes:[
         {t:0,pos:{gk:G(.5,.05),a5:G(.03,.03),ball:G(.03,.03),
           a1:G(.36,.20),a2:G(.48,.16),a3:G(.58,.18),a4:G(.66,.24),
-          d1:G(.30,.50),d2:G(.45,.55),d3:G(.58,.52),d4:G(.70,.46),d5:G(.52,.66)}},
+          d1:G(.23,.09),d2:G(.32,.33),d3:G(.70,.14),d4:G(.56,.32),d5:G(.57,.55)}},
         {t:1.6,pos:{ball:G(.48,.18)},ease:"linear"},
         {t:2.8,pos:{ball:G(.58,.18)},ease:"linear"},
         {t:3.8,pos:{ball:G(.54,.02),a3:G(.56,.10)}}],
@@ -360,6 +364,7 @@ const TERMS = [
         {t:3.8,text:"Tap-in. Goal.",point:"a3"}] },
     { kind:"CORRECT", title:"Compact at a corner",
       desc:"Compact corner defence: a defender on each post and everyone else marking tight and goal-side, so the cross is cut out and booted clear.",
+      cornerKick:{label:"Corner Kick",until:1.6},
       entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},
         {id:"d1",team:"blue"},{id:"d2",team:"blue"},{id:"d3",team:"blue"},{id:"d4",team:"blue"},{id:"d5",team:"blue"},
         {id:"a1",team:"red"},{id:"a2",team:"red"},{id:"a3",team:"red"},{id:"a4",team:"red"},{id:"a5",team:"red"},
@@ -562,9 +567,9 @@ const TERMS = [
     { kind:"INCORRECT", title:"Back to goal",
       desc:"The receiver stays square with their back to goal, gets pinned by the marker, and is forced backward.",
       entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"a1",team:"red",vision:true},{id:"a2",team:"red"},
-        {id:"a3",team:"red"},{id:"d1",team:"blue"},{id:"ball",kind:"ball"}],
+        {id:"a3",team:"red"},{id:"d1",team:"blue"},{id:"d2",team:"blue"},{id:"ball",kind:"ball"}],
       keyframes:[
-        {t:0,pos:{gk:G(.5,.06),a2:G(.5,.78),ball:G(.5,.80),a1:G(.5,.55),d1:G(.5,.48),a3:G(.5,.30)},face:{a1:G(.5,.99)}},
+        {t:0,pos:{gk:G(.5,.06),a2:G(.5,.78),ball:G(.5,.80),a1:G(.5,.55),d1:G(.5,.48),d2:G(.40,.21),a3:G(.5,.30)},face:{a1:G(.5,.99)}},
         {t:1.2,pos:{ball:G(.5,.57),a1:G(.5,.55)},ease:"linear"},
         {t:2.4,pos:{a1:G(.5,.62),ball:G(.5,.64),d1:G(.5,.50)}},
         {t:3.4,pos:{ball:G(.5,.76),a2:G(.5,.76)}}],
@@ -576,9 +581,9 @@ const TERMS = [
     { kind:"CORRECT", title:"Half turn",
       desc:"Before the ball arrives, the receiver (open, side-on) has already scanned the passer, their marker, and the open teammate — so they receive and first-time a through ball into space.",
       entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"a1",team:"red",vision:true},{id:"a2",team:"red"},
-        {id:"a3",team:"red"},{id:"d1",team:"blue"},{id:"ball",kind:"ball"}],
+        {id:"a3",team:"red"},{id:"d1",team:"blue"},{id:"d2",team:"blue"},{id:"ball",kind:"ball"}],
       keyframes:[
-        {t:0,pos:{gk:G(.5,.06),a2:G(.5,.80),ball:G(.5,.82),a1:G(.62,.55),d1:G(.60,.44),a3:G(.25,.30)},face:{a1:G(.22,.48)}},
+        {t:0,pos:{gk:G(.5,.06),a2:G(.5,.80),ball:G(.5,.82),a1:G(.62,.55),d1:G(.60,.44),d2:G(.40,.21),a3:G(.25,.30)},face:{a1:G(.22,.48)}},
         {t:2.6,pos:{a2:G(.5,.80),ball:G(.5,.82),a1:G(.62,.55),d1:G(.60,.44),a3:G(.25,.30)}},
         {t:3.6,pos:{ball:G(.62,.56),a1:G(.64,.54),d1:G(.66,.50)},face:{a1:G(.30,.36)}},
         {t:4.8,pos:{ball:G(.26,.28),a3:G(.23,.22)},ease:"linear"}],
@@ -597,33 +602,35 @@ const TERMS = [
   orientation:"defending", pitch:"two-thirds",
   variants:[
     { kind:"INCORRECT", title:"Dropping off",
-      desc:"After losing the ball our nearest players jog back and give the ball-winner time, who plays forward freely.",
+      desc:"They take the ball off YOU; instead of hunting it back, our players drop off and the opponent has acres of space.",
       entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"d1",team:"blue"},{id:"d2",team:"blue"},
         {id:"a1",team:"red"},{id:"a2",team:"red"},{id:"ball",kind:"ball"}],
       keyframes:[
-        {t:0,pos:{gk:G(.5,.06),a1:G(.5,.60),ball:G(.5,.62),d1:G(.45,.50),d2:G(.60,.52),a2:G(.30,.55)}},
-        {t:1.4,pos:{d1:G(.45,.40),d2:G(.60,.42)}},
-        {t:2.8,pos:{a1:G(.5,.45),ball:G(.5,.47),d1:G(.45,.34),d2:G(.60,.36)}},
-        {t:4.0,pos:{a1:G(.5,.28),ball:G(.5,.30)}}],
+        {t:0,pos:{gk:G(.5,.06),d1:G(.5,.55),ball:G(.5,.57),a1:G(.56,.50),d2:G(.35,.60),a2:G(.66,.55)}},
+        {t:1.2,pos:{a1:G(.52,.55),ball:G(.53,.55),d1:G(.5,.56)}},
+        {t:2.4,pos:{d1:G(.5,.46),d2:G(.40,.52),a1:G(.52,.48),ball:G(.52,.50)}},
+        {t:3.6,pos:{a1:G(.5,.32),ball:G(.5,.34)}}],
       pauses:[
-        {t:0,text:"We've just lost the ball.",point:"d1"},
-        {t:1.4,text:"Our players jog back and drop off — no pressure on the ball-winner.",point:"d1"},
-        {t:2.8,text:"Given time and space, they carry forward easily.",point:"a1",shapes:[{type:"space",at:"a1",r:.1}]},
-        {t:4.0,text:"The counter rolls on toward goal.",point:"a1"}] },
+        {t:0,text:"YOU are on the ball — but under pressure.",point:"d1"},
+        {t:1.2,text:"They take it off you — coach yells: HUNT!",point:"a1"},
+        {t:2.4,text:"Instead we drop off — the opponent has acres of space.",point:"d1",shapes:[{type:"space",at:"a1",r:.12}]},
+        {t:3.6,text:"They carry into it — the moment to win it back is gone.",point:"a1"}] },
     { kind:"CORRECT", title:"Hunt the ball",
-      desc:"The instant we lose it the two nearest players counter-press from both angles and win it back high.",
+      desc:"The instant we lose it YOU hunt the ball back while a teammate covers; we win it and the cover then breaks into an open lane.",
       entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"d1",team:"blue"},{id:"d2",team:"blue"},
         {id:"a1",team:"red"},{id:"a2",team:"red"},{id:"ball",kind:"ball"}],
       keyframes:[
-        {t:0,pos:{gk:G(.5,.06),a1:G(.5,.60),ball:G(.5,.62),d1:G(.45,.50),d2:G(.60,.52),a2:G(.30,.55)}},
-        {t:1.0,pos:{d1:G(.48,.57),d2:G(.56,.58)}},
-        {t:2.0,pos:{d1:G(.50,.61),ball:G(.52,.62),d2:G(.55,.60),a1:G(.46,.61)}},
-        {t:3.0,pos:{ball:G(.5,.68),d1:G(.5,.66)}}],
+        {t:0,pos:{gk:G(.5,.06),d1:G(.5,.55),ball:G(.5,.57),a1:G(.56,.50),d2:G(.35,.60),a2:G(.66,.55)}},
+        {t:1.2,pos:{a1:G(.52,.55),ball:G(.53,.55),d1:G(.5,.56)}},
+        {t:2.2,pos:{d1:G(.52,.54),d2:G(.45,.62)}},
+        {t:3.2,pos:{ball:G(.5,.57),d1:G(.5,.56)}},
+        {t:4.2,pos:{d2:G(.62,.46),ball:G(.60,.47)}}],
       pauses:[
-        {t:0,text:"The instant possession is lost — HUNT.",point:"d1"},
-        {t:1.0,text:"The two nearest players counter-press from both angles.",point:"d1",shapes:[{type:"run",from:G(.45,.50),to:G(.50,.60)}]},
-        {t:2.0,text:"Trapped, no time on the ball.",point:"a1",shapes:[{type:"space",at:"ball",r:.07}]},
-        {t:3.0,text:"Won back high, before they can break.",point:"d1"}] }
+        {t:0,text:"YOU are on the ball — under pressure.",point:"d1"},
+        {t:1.2,text:"They take it off you — coach yells: HUNT!",point:"a1"},
+        {t:2.2,text:"YOU go straight back at it; your teammate COVERS behind.",point:"d1",shapes:[{type:"run",from:G(.5,.56),to:G(.52,.54)},{type:"space",at:"d2",r:.09}]},
+        {t:3.2,text:"Pressure wins it back.",point:"d1"},
+        {t:4.2,text:"Now in possession, the cover breaks into an open lane.",point:"d2",shapes:[{type:"lane",from:"d1",to:"d2"}]}] }
   ]
 },
 {
@@ -671,27 +678,27 @@ const TERMS = [
       entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"d1",team:"blue"},{id:"d2",team:"blue"},{id:"d3",team:"blue"},
         {id:"a1",team:"red"},{id:"a2",team:"red"},{id:"ball",kind:"ball"}],
       keyframes:[
-        {t:0,pos:{gk:G(.5,.06),d1:G(.35,.30),d2:G(.50,.30),d3:G(.65,.30),a1:G(.78,.55),ball:G(.78,.57),a2:G(.20,.50)}},
+        {t:0,pos:{gk:G(.5,.06),d1:G(.50,.30),d2:G(.62,.30),d3:G(.74,.30),a1:G(.78,.55),ball:G(.78,.57),a2:G(.20,.50)}},
         {t:1.4,pos:{ball:G(.50,.52)},ease:"linear"},
-        {t:2.6,pos:{ball:G(.20,.50),a2:G(.20,.50)}},
-        {t:3.6,pos:{a2:G(.20,.22),ball:G(.20,.24)}}],
+        {t:2.6,pos:{ball:G(.20,.50),a2:G(.20,.50),d1:G(.35,.40),d2:G(.58,.22)}},
+        {t:3.6,pos:{a2:G(.20,.28),ball:G(.20,.30)}}],
       pauses:[
-        {t:0,text:"Ball on one side; watch the back line.",point:"d2"},
-        {t:1.4,text:"It's switched across the field.",point:"ball",shapes:[{type:"lane",from:G(.78,.57),to:G(.20,.50)}]},
-        {t:2.6,text:"The line stayed flat and central — the far side is free.",point:"a2",shapes:[{type:"space",at:"a2",r:.1}]},
-        {t:3.6,text:"Overloaded out wide — cross and danger.",point:"a2"}] },
+        {t:0,text:"Ball on the right — the line is set across to the right.",point:"d2"},
+        {t:1.4,text:"It's switched to the far side.",point:"ball",shapes:[{type:"lane",from:G(.78,.57),to:G(.20,.50)}]},
+        {t:2.6,text:"Each defender goes their own way — spread out, with holes opening up.",point:"d2",shapes:[{type:"space",at:G(.27,.42),r:.11},{type:"space",at:G(.47,.34),r:.10}]},
+        {t:3.6,text:"The free attacker exploits the gaps.",point:"a2"}] },
     { kind:"CORRECT", title:"Shift across",
       desc:"As the ball travels the whole line slides across together, staying compact and ball-oriented; the far side is covered.",
       entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"d1",team:"blue"},{id:"d2",team:"blue"},{id:"d3",team:"blue"},
         {id:"a1",team:"red"},{id:"a2",team:"red"},{id:"ball",kind:"ball"}],
       keyframes:[
-        {t:0,pos:{gk:G(.5,.06),d1:G(.35,.30),d2:G(.50,.30),d3:G(.65,.30),a1:G(.78,.55),ball:G(.78,.57),a2:G(.20,.50)}},
+        {t:0,pos:{gk:G(.5,.06),d1:G(.50,.30),d2:G(.62,.30),d3:G(.74,.30),a1:G(.78,.55),ball:G(.78,.57),a2:G(.20,.50)}},
         {t:1.4,pos:{ball:G(.50,.52),d1:G(.22,.30),d2:G(.37,.30),d3:G(.52,.30)},ease:"linear"},
         {t:2.6,pos:{ball:G(.20,.50),a2:G(.20,.50),d1:G(.20,.36)}},
         {t:3.6,pos:{ball:G(.32,.55),a2:G(.24,.50)}}],
       pauses:[
-        {t:0,text:"Ball on one side; watch the back line.",point:"d2"},
-        {t:1.4,text:"As the ball travels, SHIFT across together.",point:"d2",shapes:[{type:"run",from:G(.50,.30),to:G(.37,.30)}]},
+        {t:0,text:"Ball on the right — the line is set across to the right.",point:"d2"},
+        {t:1.4,text:"As the ball travels, SHIFT across together — over to the left.",point:"d2",shapes:[{type:"run",from:G(.62,.30),to:G(.37,.30)}]},
         {t:2.6,text:"The whole line slides over — the far side is covered.",point:"d1",shapes:[{type:"lane",from:"a1",to:"a2"}]},
         {t:3.6,text:"Compact and ball-oriented; contained.",point:"a2"}] }
   ]
@@ -1615,7 +1622,7 @@ function drawVision(){
 }
 // small label above the ball during a throw-in restart
 function drawThrowIn(){
-  const v=S.term.variants[S.vIndex], ti=v.throwIn;
+  const v=S.term.variants[S.vIndex], ti=v.throwIn||v.cornerKick;   // restart label above the ball
   if(!ti || S.t > (ti.until==null?Infinity:ti.until)) return;
   const bp=samplePos(S.comp,'ball',S.t), c=project(bp[0],bp[1]);
   const text=ti.label||"Throw-in";
