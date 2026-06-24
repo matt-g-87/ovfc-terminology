@@ -448,7 +448,7 @@ const TERMS = [
 },
 /* ---------------------------------------------------------------- ATTACKING */
 {
-  id:"check-in-out", name:"Check In, Check Out", group:"Attacking",
+  id:"check-in-out", name:"Check In, Check Out", group:"Attacking & Forward Play",
   def:"Make a sharp run toward the ball (check in), then pivot and explode into space the other way (check out).",
   orientation:"attacking", pitch:"two-thirds",
   variants:[
@@ -485,7 +485,7 @@ const TERMS = [
   ]
 },
 {
-  id:"switch", name:"Switch", group:"Attacking",
+  id:"switch", name:"Switch", group:"Attacking & Forward Play",
   def:"Get the ball from one side of the field to the other to attack the space.",
   orientation:"attacking", pitch:"two-thirds",
   variants:[
@@ -522,7 +522,7 @@ const TERMS = [
   ]
 },
 {
-  id:"overloads", name:"Overloads", group:"Attacking",
+  id:"overloads", name:"Overloads", group:"Attacking & Forward Play",
   def:"Create and use a numerical advantage (+1).",
   orientation:"attacking", pitch:"two-thirds",
   variants:[
@@ -555,7 +555,7 @@ const TERMS = [
   ]
 },
 {
-  id:"half-turn", name:"Half Turn", group:"Attacking",
+  id:"half-turn", name:"Half Turn", group:"Attacking & Forward Play",
   def:"Open your body to see where the pass is coming from and where you want to go with it.",
   orientation:"attacking", pitch:"two-thirds",
   variants:[
@@ -589,12 +589,704 @@ const TERMS = [
         {t:3.6,text:"You receive on the half-turn — already knowing the marker is there, you cheat right to open the angle.",point:"a1",shapes:[{type:"space",at:"a1",r:.09}]},
         {t:4.8,text:"One-touch pass into space for your open teammate.",point:"a3",shapes:[{type:"lane",from:"a1",to:"a3"}]}] }
   ]
+},
+/* ===================================== PHASE 12 — DEFENDING ===================================== */
+{
+  id:"hunt", name:"Hunt", group:"Defending",
+  def:"Counter-press as soon as possession is lost, if possible.",
+  orientation:"defending", pitch:"two-thirds",
+  variants:[
+    { kind:"INCORRECT", title:"Dropping off",
+      desc:"After losing the ball our nearest players jog back and give the ball-winner time, who plays forward freely.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"d1",team:"blue"},{id:"d2",team:"blue"},
+        {id:"a1",team:"red"},{id:"a2",team:"red"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a1:G(.5,.60),ball:G(.5,.62),d1:G(.45,.50),d2:G(.60,.52),a2:G(.30,.55)}},
+        {t:1.4,pos:{d1:G(.45,.40),d2:G(.60,.42)}},
+        {t:2.8,pos:{a1:G(.5,.45),ball:G(.5,.47),d1:G(.45,.34),d2:G(.60,.36)}},
+        {t:4.0,pos:{a1:G(.5,.28),ball:G(.5,.30)}}],
+      pauses:[
+        {t:0,text:"We've just lost the ball.",point:"d1"},
+        {t:1.4,text:"Our players jog back and drop off — no pressure on the ball-winner.",point:"d1"},
+        {t:2.8,text:"Given time and space, they carry forward easily.",point:"a1",shapes:[{type:"space",at:"a1",r:.1}]},
+        {t:4.0,text:"The counter rolls on toward goal.",point:"a1"}] },
+    { kind:"CORRECT", title:"Hunt the ball",
+      desc:"The instant we lose it the two nearest players counter-press from both angles and win it back high.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"d1",team:"blue"},{id:"d2",team:"blue"},
+        {id:"a1",team:"red"},{id:"a2",team:"red"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a1:G(.5,.60),ball:G(.5,.62),d1:G(.45,.50),d2:G(.60,.52),a2:G(.30,.55)}},
+        {t:1.0,pos:{d1:G(.48,.57),d2:G(.56,.58)}},
+        {t:2.0,pos:{d1:G(.50,.61),ball:G(.52,.62),d2:G(.55,.60),a1:G(.46,.61)}},
+        {t:3.0,pos:{ball:G(.5,.68),d1:G(.5,.66)}}],
+      pauses:[
+        {t:0,text:"The instant possession is lost — HUNT.",point:"d1"},
+        {t:1.0,text:"The two nearest players counter-press from both angles.",point:"d1",shapes:[{type:"run",from:G(.45,.50),to:G(.50,.60)}]},
+        {t:2.0,text:"Trapped, no time on the ball.",point:"a1",shapes:[{type:"space",at:"ball",r:.07}]},
+        {t:3.0,text:"Won back high, before they can break.",point:"d1"}] }
+  ]
+},
+{
+  id:"hold", name:"Hold", group:"Defending",
+  def:"Don't leave your positioning — stay.",
+  orientation:"defending", pitch:"two-thirds",
+  variants:[
+    { kind:"INCORRECT", title:"Stepping out",
+      desc:"A defender leaves the line to chase, opening a gap; the runner is played through it.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"d1",team:"blue"},{id:"d2",team:"blue"},{id:"d3",team:"blue"},
+        {id:"a1",team:"red"},{id:"a2",team:"red"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),d1:G(.35,.30),d2:G(.50,.30),d3:G(.65,.30),a1:G(.5,.62),ball:G(.5,.64),a2:G(.5,.46)}},
+        {t:1.4,pos:{d2:G(.5,.46)}},
+        {t:2.6,pos:{a2:G(.5,.22),ball:G(.5,.26)},ease:"linear"},
+        {t:3.6,pos:{a2:G(.5,.08),ball:G(.5,.04)}}],
+      pauses:[
+        {t:0,text:"Back line set, compact.",point:"d2"},
+        {t:1.4,text:"A defender steps out to chase — opening a gap in the line.",point:"d2",shapes:[{type:"space",at:G(.5,.30),r:.09}]},
+        {t:2.6,text:"The runner attacks the space behind.",point:"a2",shapes:[{type:"lane",from:"a1",to:"a2"}]},
+        {t:3.6,text:"Played clean through on goal.",point:"a2"}] },
+    { kind:"CORRECT", title:"Hold the line",
+      desc:"The defender holds position; the line stays intact, the run finds no gap, and the attack is forced backward.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"d1",team:"blue"},{id:"d2",team:"blue"},{id:"d3",team:"blue"},
+        {id:"a1",team:"red"},{id:"a2",team:"red"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),d1:G(.35,.30),d2:G(.50,.30),d3:G(.65,.30),a1:G(.5,.62),ball:G(.5,.64),a2:G(.5,.46)}},
+        {t:1.4,pos:{d2:G(.50,.32)}},
+        {t:2.6,pos:{a2:G(.5,.40)}},
+        {t:3.6,pos:{ball:G(.62,.66),a1:G(.62,.62)}}],
+      pauses:[
+        {t:0,text:"Back line set, compact.",point:"d2"},
+        {t:1.4,text:"HOLD — the defender keeps position; the line stays intact.",point:"d2",shapes:[{type:"lane",from:"d1",to:"d3"}]},
+        {t:2.6,text:"No gap to run into — the runner is kept in front of the line.",point:"d2"},
+        {t:3.6,text:"The attack is forced backward.",point:"a1"}] }
+  ]
+},
+{
+  id:"shift", name:"Shift", group:"Defending",
+  def:"Horizontal movement as a team.",
+  orientation:"defending", pitch:"two-thirds",
+  variants:[
+    { kind:"INCORRECT", title:"Flat and static",
+      desc:"The ball is switched but the line stays flat and central, leaving the far side free to attack.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"d1",team:"blue"},{id:"d2",team:"blue"},{id:"d3",team:"blue"},
+        {id:"a1",team:"red"},{id:"a2",team:"red"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),d1:G(.35,.30),d2:G(.50,.30),d3:G(.65,.30),a1:G(.78,.55),ball:G(.78,.57),a2:G(.20,.50)}},
+        {t:1.4,pos:{ball:G(.50,.52)},ease:"linear"},
+        {t:2.6,pos:{ball:G(.20,.50),a2:G(.20,.50)}},
+        {t:3.6,pos:{a2:G(.20,.22),ball:G(.20,.24)}}],
+      pauses:[
+        {t:0,text:"Ball on one side; watch the back line.",point:"d2"},
+        {t:1.4,text:"It's switched across the field.",point:"ball",shapes:[{type:"lane",from:G(.78,.57),to:G(.20,.50)}]},
+        {t:2.6,text:"The line stayed flat and central — the far side is free.",point:"a2",shapes:[{type:"space",at:"a2",r:.1}]},
+        {t:3.6,text:"Overloaded out wide — cross and danger.",point:"a2"}] },
+    { kind:"CORRECT", title:"Shift across",
+      desc:"As the ball travels the whole line slides across together, staying compact and ball-oriented; the far side is covered.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"d1",team:"blue"},{id:"d2",team:"blue"},{id:"d3",team:"blue"},
+        {id:"a1",team:"red"},{id:"a2",team:"red"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),d1:G(.35,.30),d2:G(.50,.30),d3:G(.65,.30),a1:G(.78,.55),ball:G(.78,.57),a2:G(.20,.50)}},
+        {t:1.4,pos:{ball:G(.50,.52),d1:G(.22,.30),d2:G(.37,.30),d3:G(.52,.30)},ease:"linear"},
+        {t:2.6,pos:{ball:G(.20,.50),a2:G(.20,.50),d1:G(.20,.36)}},
+        {t:3.6,pos:{ball:G(.32,.55),a2:G(.24,.50)}}],
+      pauses:[
+        {t:0,text:"Ball on one side; watch the back line.",point:"d2"},
+        {t:1.4,text:"As the ball travels, SHIFT across together.",point:"d2",shapes:[{type:"run",from:G(.50,.30),to:G(.37,.30)}]},
+        {t:2.6,text:"The whole line slides over — the far side is covered.",point:"d1",shapes:[{type:"lane",from:"a1",to:"a2"}]},
+        {t:3.6,text:"Compact and ball-oriented; contained.",point:"a2"}] }
+  ]
+},
+{
+  id:"drop", name:"Drop", group:"Defending",
+  def:"On a turnover or quick opponent throw, midfielders drop into defensive positions fast.",
+  orientation:"defending", pitch:"two-thirds",
+  variants:[
+    { kind:"INCORRECT", title:"Caught high",
+      desc:"After the turnover our midfielders stay high and ball-watch, so the opponent breaks straight through the vacated middle.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"d1",team:"blue"},{id:"m1",team:"blue"},{id:"m2",team:"blue"},
+        {id:"a1",team:"red"},{id:"a2",team:"red"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),d1:G(.5,.24),m1:G(.40,.62),m2:G(.60,.62),a1:G(.5,.70),ball:G(.5,.72),a2:G(.30,.60)}},
+        {t:1.4,pos:{a1:G(.5,.52),ball:G(.5,.54)}},
+        {t:2.6,pos:{a1:G(.5,.38),ball:G(.5,.40)}},
+        {t:3.6,pos:{a1:G(.5,.20),ball:G(.5,.22)}}],
+      pauses:[
+        {t:0,text:"Turnover — they're about to attack fast.",point:"m1"},
+        {t:1.4,text:"Our midfielders stay high and ball-watch.",point:"m1",shapes:[{type:"space",at:G(.5,.45),r:.12}]},
+        {t:2.6,text:"The middle is wide open — they break through it.",point:"a1"},
+        {t:3.6,text:"On goal before we recover.",point:"a1"}] },
+    { kind:"CORRECT", title:"Drop in fast",
+      desc:"On the trigger the midfielders sprint back into defensive positions; the block re-forms compact and the attack is contained.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"d1",team:"blue"},{id:"m1",team:"blue"},{id:"m2",team:"blue"},
+        {id:"a1",team:"red"},{id:"a2",team:"red"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),d1:G(.5,.24),m1:G(.40,.62),m2:G(.60,.62),a1:G(.5,.70),ball:G(.5,.72),a2:G(.30,.60)}},
+        {t:1.2,pos:{m1:G(.44,.46),m2:G(.56,.46)}},
+        {t:2.4,pos:{m1:G(.45,.36),m2:G(.55,.36),a1:G(.5,.62),ball:G(.5,.64)}},
+        {t:3.6,pos:{ball:G(.34,.66),a1:G(.40,.62)}}],
+      pauses:[
+        {t:0,text:"Turnover — they're about to attack fast.",point:"m1"},
+        {t:1.2,text:"DROP — midfielders sprint back into defensive positions.",point:"m1",shapes:[{type:"run",from:G(.40,.62),to:G(.44,.46)}]},
+        {t:2.4,text:"The block re-forms, compact in front of the defense.",point:"m1"},
+        {t:3.6,text:"No way through; the attack is forced wide and contained.",point:"a1"}] }
+  ]
+},
+/* ============================== PHASE 12 — POSSESSION & BUILD-UP ============================== */
+{
+  id:"secure", name:"Secure", group:"Possession & Build-up",
+  def:"Establish possession on the regain. Don't force it forward.",
+  orientation:"attacking", pitch:"two-thirds",
+  variants:[
+    { kind:"INCORRECT", title:"Forcing it",
+      desc:"On winning the ball a hopeful forward pass is fired into a covered player and intercepted.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"a1",team:"red"},{id:"a2",team:"red"},{id:"a3",team:"red"},
+        {id:"d1",team:"blue"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a1:G(.5,.55),ball:G(.5,.57),a2:G(.35,.62),a3:G(.5,.32),d1:G(.5,.36)}},
+        {t:1.4,pos:{ball:G(.5,.37)},ease:"linear"},
+        {t:2.6,pos:{ball:G(.5,.35),d1:G(.5,.35)}}],
+      pauses:[
+        {t:0,text:"We've just won the ball back.",point:"a1"},
+        {t:1.4,text:"A hopeful ball is forced forward into a covered player.",point:"a1",shapes:[{type:"lane",from:"a1",to:"a3"}]},
+        {t:2.6,text:"Intercepted — we lose it straight back.",point:"d1"}] },
+    { kind:"CORRECT", title:"Secure it",
+      desc:"A safe pass to support keeps the ball; settle, then build from a stable base.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"a1",team:"red"},{id:"a2",team:"red"},{id:"a3",team:"red"},
+        {id:"d1",team:"blue"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a1:G(.5,.55),ball:G(.5,.57),a2:G(.35,.62),a3:G(.5,.32),d1:G(.5,.36)}},
+        {t:1.2,pos:{ball:G(.36,.61)},ease:"linear"},
+        {t:2.4,pos:{a2:G(.35,.60)}},
+        {t:3.4,pos:{ball:G(.52,.56),a1:G(.52,.55)}}],
+      pauses:[
+        {t:0,text:"We've just won the ball back.",point:"a1"},
+        {t:1.2,text:"SECURE it — a safe pass to support, don't force it.",point:"a1",shapes:[{type:"lane",from:"a1",to:"a2"}]},
+        {t:2.4,text:"Settle and keep the ball.",point:"a2"},
+        {t:3.4,text:"Now build from a stable base.",point:"a1"}] }
+  ]
+},
+{
+  id:"support", name:"Support", group:"Possession & Build-up",
+  def:"Provide options near, far and around the ball.",
+  orientation:"attacking", pitch:"two-thirds",
+  variants:[
+    { kind:"INCORRECT", title:"Isolated",
+      desc:"Teammates stay flat or behind cover, the carrier has no angle, is pressed and loses it.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"a1",team:"red"},{id:"a2",team:"red"},{id:"a3",team:"red"},{id:"a4",team:"red"},
+        {id:"d1",team:"blue"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a1:G(.5,.55),ball:G(.5,.57),a2:G(.5,.40),a3:G(.20,.70),a4:G(.80,.66),d1:G(.5,.48)}},
+        {t:1.4,pos:{d1:G(.5,.53)}},
+        {t:2.6,pos:{ball:G(.5,.50),d1:G(.5,.52)}}],
+      pauses:[
+        {t:0,text:"On the ball, pressure coming.",point:"a1"},
+        {t:1.4,text:"Teammates are flat or behind — no passing angle.",point:"a1"},
+        {t:2.6,text:"Isolated and dispossessed.",point:"d1"}] },
+    { kind:"CORRECT", title:"Support the ball",
+      desc:"Options arrive near, forward and around the ball, so the carrier plays out of pressure.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"a1",team:"red"},{id:"a2",team:"red"},{id:"a3",team:"red"},{id:"a4",team:"red"},
+        {id:"d1",team:"blue"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a1:G(.5,.55),ball:G(.5,.57),a2:G(.34,.50),a3:G(.5,.36),a4:G(.70,.60),d1:G(.5,.48)}},
+        {t:1.2,pos:{d1:G(.5,.53)}},
+        {t:2.4,pos:{ball:G(.35,.51),a2:G(.34,.50)},ease:"linear"},
+        {t:3.4,pos:{ball:G(.34,.42),a2:G(.34,.42)}}],
+      pauses:[
+        {t:0,text:"On the ball, pressure coming.",point:"a1"},
+        {t:1.2,text:"Support arrives near, forward and around the ball.",point:"a1",shapes:[{type:"lane",from:"a1",to:"a2"},{type:"lane",from:"a1",to:"a3"},{type:"lane",from:"a1",to:"a4"}]},
+        {t:2.4,text:"An easy out-ball through the press.",point:"a2"},
+        {t:3.4,text:"Out and progressing.",point:"a2"}] }
+  ]
+},
+{
+  id:"disperse", name:"Disperse", group:"Possession & Build-up",
+  def:"Occupy width and depth to create space.",
+  orientation:"attacking", pitch:"two-thirds",
+  variants:[
+    { kind:"INCORRECT", title:"Bunched up",
+      desc:"Attackers cluster centrally so the defenders compact and cover everything; the ball is lost.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"a1",team:"red"},{id:"a2",team:"red"},{id:"a3",team:"red"},{id:"a4",team:"red"},
+        {id:"d1",team:"blue"},{id:"d2",team:"blue"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a1:G(.5,.60),ball:G(.5,.62),a2:G(.44,.52),a3:G(.56,.54),a4:G(.5,.46),d1:G(.45,.50),d2:G(.55,.50)}},
+        {t:1.6,pos:{ball:G(.5,.50),d1:G(.48,.49)}},
+        {t:2.6,pos:{ball:G(.5,.54),d1:G(.5,.52)}}],
+      pauses:[
+        {t:0,text:"In possession.",point:"a1"},
+        {t:1.6,text:"Attackers are bunched together — easy to defend.",point:"a1",shapes:[{type:"space",at:G(.5,.5),r:.12}]},
+        {t:2.6,text:"Defenders cover it all; the ball is lost.",point:"d1"}] },
+    { kind:"CORRECT", title:"Disperse",
+      desc:"Spreading wide and deep stretches the defense and opens a lane through the middle.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"a1",team:"red"},{id:"a2",team:"red"},{id:"a3",team:"red"},{id:"a4",team:"red"},
+        {id:"d1",team:"blue"},{id:"d2",team:"blue"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a1:G(.5,.60),ball:G(.5,.62),a2:G(.16,.50),a3:G(.84,.50),a4:G(.5,.30),d1:G(.45,.50),d2:G(.55,.50)}},
+        {t:1.4,pos:{d1:G(.30,.48),d2:G(.70,.48)}},
+        {t:2.4,pos:{ball:G(.5,.38),a4:G(.5,.34)},ease:"linear"},
+        {t:3.4,pos:{a4:G(.5,.24),ball:G(.5,.26)}}],
+      pauses:[
+        {t:0,text:"In possession.",point:"a1"},
+        {t:1.4,text:"Spread WIDE and DEEP — stretch the defense.",point:"a1",shapes:[{type:"space",at:G(.5,.46),r:.12}]},
+        {t:2.4,text:"A lane opens through the middle.",point:"a4",shapes:[{type:"lane",from:"a1",to:"a4"}]},
+        {t:3.4,text:"Played through into space.",point:"a4"}] }
+  ]
+},
+{
+  id:"balance", name:"Balance", group:"Possession & Build-up",
+  def:"Attacking positional awareness and defensive positional responsibility.",
+  orientation:"attacking", pitch:"two-thirds",
+  variants:[
+    { kind:"INCORRECT", title:"Everyone forward",
+      desc:"All players push up; the ball is lost and there's no one home, so the counter runs clear.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"a1",team:"red"},{id:"a2",team:"red"},{id:"a3",team:"red"},{id:"a4",team:"red"},
+        {id:"d1",team:"blue"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a1:G(.40,.42),ball:G(.40,.44),a2:G(.60,.40),a3:G(.5,.30),a4:G(.5,.55),d1:G(.55,.52)}},
+        {t:1.4,pos:{a4:G(.5,.42),ball:G(.46,.46),d1:G(.50,.50)}},
+        {t:2.6,pos:{ball:G(.5,.66),d1:G(.5,.64)}},
+        {t:3.6,pos:{ball:G(.5,.90),d1:G(.5,.88)}}],
+      pauses:[
+        {t:0,text:"We're attacking.",point:"a4"},
+        {t:1.4,text:"Everyone pushes up — no balance behind.",point:"a4"},
+        {t:2.6,text:"We lose it; their player breaks away.",point:"d1"},
+        {t:3.6,text:"A clear counter — nobody's home.",point:"d1"}] },
+    { kind:"CORRECT", title:"Stay balanced",
+      desc:"One player stays back as cover, so when the ball is lost the counter runs straight into them.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"a1",team:"red"},{id:"a2",team:"red"},{id:"a3",team:"red"},{id:"a4",team:"red"},
+        {id:"d1",team:"blue"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a1:G(.40,.42),ball:G(.40,.44),a2:G(.60,.40),a3:G(.5,.30),a4:G(.5,.62),d1:G(.55,.50)}},
+        {t:1.4,pos:{ball:G(.46,.47),d1:G(.52,.48)}},
+        {t:2.6,pos:{d1:G(.5,.56),ball:G(.5,.58)}},
+        {t:3.6,pos:{ball:G(.5,.61),a4:G(.5,.60)}}],
+      pauses:[
+        {t:0,text:"We're attacking — but one player stays back.",point:"a4"},
+        {t:1.4,text:"BALANCE: cover held behind the ball.",point:"a4",shapes:[{type:"space",at:"a4",r:.1}]},
+        {t:2.6,text:"We lose it — the counter starts…",point:"d1"},
+        {t:3.6,text:"…straight into our cover. Snuffed out.",point:"a4"}] }
+  ]
+},
+{
+  id:"set", name:"Set", group:"Possession & Build-up",
+  def:"A soft, backwards-angled pass.",
+  orientation:"attacking", pitch:"two-thirds",
+  variants:[
+    { kind:"INCORRECT", title:"Turning into pressure",
+      desc:"Back to goal and marked, the receiver tries to turn into the defender and loses it.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"a1",team:"red"},{id:"a2",team:"red"},{id:"a3",team:"red"},
+        {id:"d1",team:"blue"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a1:G(.5,.70),ball:G(.5,.72),a2:G(.5,.50),d1:G(.5,.43),a3:G(.35,.62)}},
+        {t:1.2,pos:{ball:G(.5,.52)},ease:"linear"},
+        {t:2.4,pos:{a2:G(.5,.46),ball:G(.5,.48)}},
+        {t:3.4,pos:{ball:G(.48,.47),d1:G(.5,.46)}}],
+      pauses:[
+        {t:0,text:"Receiver has their back to goal, marked.",point:"a2"},
+        {t:1.2,text:"Ball played into feet.",point:"a2"},
+        {t:2.4,text:"Tries to turn into the defender.",point:"a2"},
+        {t:3.4,text:"Dispossessed.",point:"d1"}] },
+    { kind:"CORRECT", title:"Set it back",
+      desc:"The receiver lays a soft, angled pass back to a teammate facing forward, who plays the next ball.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"a1",team:"red"},{id:"a2",team:"red"},{id:"a3",team:"red"},
+        {id:"d1",team:"blue"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a1:G(.5,.70),ball:G(.5,.72),a2:G(.5,.50),d1:G(.5,.43),a3:G(.35,.62)}},
+        {t:1.2,pos:{ball:G(.5,.52)},ease:"linear"},
+        {t:2.2,pos:{ball:G(.37,.61)},ease:"linear"},
+        {t:3.4,pos:{ball:G(.40,.40)},ease:"linear"}],
+      pauses:[
+        {t:0,text:"Receiver back to goal, marked.",point:"a2"},
+        {t:1.2,text:"Ball into feet — don't force the turn.",point:"a2"},
+        {t:2.2,text:"SET: a soft, angled pass back to a teammate facing forward.",point:"a2",shapes:[{type:"lane",from:"a2",to:"a3"}]},
+        {t:3.4,text:"They play forward first time — attack continues.",point:"a3"}] }
+  ]
+},
+{
+  id:"bounce", name:"Bounce", group:"Possession & Build-up",
+  def:"A first-touch, straight pass back.",
+  orientation:"attacking", pitch:"two-thirds",
+  variants:[
+    { kind:"INCORRECT", title:"Extra touch",
+      desc:"Under pressure the wall player takes an extra touch and the defender nicks it.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"a1",team:"red"},{id:"a2",team:"red"},
+        {id:"d1",team:"blue"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a1:G(.5,.65),ball:G(.5,.67),a2:G(.5,.45),d1:G(.5,.38)}},
+        {t:1.2,pos:{ball:G(.5,.47)},ease:"linear"},
+        {t:2.4,pos:{a2:G(.5,.43),ball:G(.5,.45),d1:G(.5,.45)}},
+        {t:3.4,pos:{ball:G(.5,.43),d1:G(.5,.43)}}],
+      pauses:[
+        {t:0,text:"Wall player marked tight.",point:"a2"},
+        {t:1.2,text:"Ball played in.",point:"a2"},
+        {t:2.4,text:"An extra touch under pressure.",point:"a2"},
+        {t:3.4,text:"The defender nicks it.",point:"d1"}] },
+    { kind:"CORRECT", title:"Bounce it",
+      desc:"A first-time, straight pass back (a wall pass) beats the press and keeps the tempo.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"a1",team:"red"},{id:"a2",team:"red"},
+        {id:"d1",team:"blue"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a1:G(.5,.65),ball:G(.5,.67),a2:G(.5,.45),d1:G(.5,.38)}},
+        {t:1.2,pos:{ball:G(.5,.47),a1:G(.5,.62)},ease:"linear"},
+        {t:1.9,pos:{ball:G(.5,.60),a1:G(.55,.56)},ease:"linear"},
+        {t:3.0,pos:{a1:G(.5,.40),ball:G(.5,.42)}}],
+      pauses:[
+        {t:0,text:"Wall player marked tight.",point:"a2"},
+        {t:1.2,text:"Ball into the wall.",point:"a2"},
+        {t:1.9,text:"BOUNCE: first-time, straight back.",point:"a2",shapes:[{type:"lane",from:"a2",to:"a1"}]},
+        {t:3.0,text:"The wall pass beats the press — keep moving.",point:"a1"}] }
+  ]
+},
+{
+  id:"punch", name:"Punch", group:"Possession & Build-up",
+  def:"Play your pass with pace.",
+  orientation:"attacking", pitch:"two-thirds",
+  variants:[
+    { kind:"INCORRECT", title:"Under-hit",
+      desc:"A slow, under-hit pass is easy to read and the defender steps in to intercept.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"a1",team:"red"},{id:"a2",team:"red"},
+        {id:"d1",team:"blue"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a1:G(.30,.60),ball:G(.30,.62),a2:G(.70,.55),d1:G(.50,.50)}},
+        {t:1.6,pos:{ball:G(.50,.57)}},
+        {t:2.6,pos:{ball:G(.50,.52),d1:G(.50,.52)}}],
+      pauses:[
+        {t:0,text:"A lane to the teammate.",point:"a1"},
+        {t:1.6,text:"An under-hit pass — slow and readable.",point:"ball"},
+        {t:2.6,text:"The defender steps in and intercepts.",point:"d1"}] },
+    { kind:"CORRECT", title:"Punch it",
+      desc:"Struck with pace, the pass arrives through the gap before the defender can react.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"a1",team:"red"},{id:"a2",team:"red"},
+        {id:"d1",team:"blue"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a1:G(.30,.60),ball:G(.30,.62),a2:G(.70,.55),d1:G(.50,.50)}},
+        {t:1.0,pos:{ball:G(.70,.56)},ease:"linear"},
+        {t:2.2,pos:{a2:G(.70,.42),ball:G(.70,.44),d1:G(.52,.50)}}],
+      pauses:[
+        {t:0,text:"A lane to the teammate.",point:"a1"},
+        {t:1.0,text:"PUNCH it — played with pace through the gap.",point:"ball",shapes:[{type:"lane",from:"a1",to:"a2"}]},
+        {t:2.2,text:"Arrives before the defender can react.",point:"a2"}] }
+  ]
+},
+{
+  id:"weight", name:"Weight", group:"Possession & Build-up",
+  def:"How hard you pass the ball for the situation.",
+  orientation:"attacking", pitch:"two-thirds",
+  variants:[
+    { kind:"INCORRECT", title:"Too heavy",
+      desc:"Over-hit, the pass runs ahead of the runner and straight through to the keeper.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"a1",team:"red"},{id:"a2",team:"red"},
+        {id:"d1",team:"blue"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a1:G(.40,.60),ball:G(.40,.62),a2:G(.55,.45),d1:G(.62,.50)}},
+        {t:1.4,pos:{a2:G(.58,.32),ball:G(.60,.30)},ease:"linear"},
+        {t:2.6,pos:{ball:G(.5,.09)}}],
+      pauses:[
+        {t:0,text:"Teammate making a run.",point:"a1"},
+        {t:1.4,text:"Too heavy — the pass runs ahead of them.",point:"ball"},
+        {t:2.6,text:"Straight through to the keeper.",point:"gk"}] },
+    { kind:"INCORRECT", title:"Too soft",
+      desc:"Under-hit, the pass hangs short and the defender steps in.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"a1",team:"red"},{id:"a2",team:"red"},
+        {id:"d1",team:"blue"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a1:G(.40,.60),ball:G(.40,.62),a2:G(.55,.45),d1:G(.62,.50)}},
+        {t:1.4,pos:{a2:G(.58,.32),ball:G(.50,.50),d1:G(.56,.47)}},
+        {t:2.6,pos:{ball:G(.55,.46),d1:G(.56,.46)}}],
+      pauses:[
+        {t:0,text:"Teammate making a run.",point:"a1"},
+        {t:1.4,text:"Too soft — it hangs short of the run.",point:"ball"},
+        {t:2.6,text:"The defender steps in and intercepts.",point:"d1"}] },
+    { kind:"CORRECT", title:"Right weight",
+      desc:"Weighted into the runner's stride so they run onto it in full flow.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"a1",team:"red"},{id:"a2",team:"red"},
+        {id:"d1",team:"blue"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a1:G(.40,.60),ball:G(.40,.62),a2:G(.55,.45),d1:G(.62,.50)}},
+        {t:1.4,pos:{a2:G(.60,.34),ball:G(.60,.36)},ease:"linear"},
+        {t:2.6,pos:{a2:G(.60,.20),ball:G(.60,.22),d1:G(.56,.46)}}],
+      pauses:[
+        {t:0,text:"Teammate making a run.",point:"a1"},
+        {t:1.4,text:"Weighted perfectly into their stride.",point:"a1",shapes:[{type:"lane",from:"a1",to:"a2"}]},
+        {t:2.6,text:"They run onto it in full flow.",point:"a2"}] }
+  ]
+},
+{
+  id:"passing-angle", name:"Passing Angle", group:"Possession & Build-up",
+  def:"Make sure there is no defender between you and the player on the ball.",
+  orientation:"attacking", pitch:"two-thirds",
+  variants:[
+    { kind:"INCORRECT", title:"In the shadow",
+      desc:"The support player stands directly behind the defender, in the passing shadow, so the pass is blocked.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"a1",team:"red"},{id:"a2",team:"red"},
+        {id:"d1",team:"blue"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a1:G(.5,.65),ball:G(.5,.67),d1:G(.5,.50),a2:G(.5,.38)}},
+        {t:1.4,pos:{ball:G(.5,.56)},ease:"linear"},
+        {t:2.4,pos:{ball:G(.5,.51),d1:G(.5,.51)}}],
+      pauses:[
+        {t:0,text:"Support is behind the defender.",point:"a2"},
+        {t:1.4,text:"In the defender's shadow — no passing lane.",point:"a2",shapes:[{type:"lane",from:"a1",to:"a2"}]},
+        {t:2.4,text:"The pass is blocked.",point:"d1"}] },
+    { kind:"CORRECT", title:"Open the angle",
+      desc:"The support player steps to the side to open a clear lane and receives cleanly.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"a1",team:"red"},{id:"a2",team:"red"},
+        {id:"d1",team:"blue"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a1:G(.5,.65),ball:G(.5,.67),d1:G(.5,.50),a2:G(.5,.38)}},
+        {t:1.2,pos:{a2:G(.72,.40)}},
+        {t:2.2,pos:{ball:G(.72,.42),a2:G(.72,.40)},ease:"linear"},
+        {t:3.2,pos:{a2:G(.72,.30),ball:G(.72,.32)}}],
+      pauses:[
+        {t:0,text:"Support behind the defender.",point:"a2"},
+        {t:1.2,text:"Adjust to open a clear ANGLE — out of the shadow.",point:"a2",shapes:[{type:"run",from:G(.5,.38),to:G(.72,.40)}]},
+        {t:2.2,text:"Now there's a lane — receives cleanly.",point:"a2",shapes:[{type:"lane",from:"a1",to:"a2"}]},
+        {t:3.2,text:"Progresses.",point:"a2"}] }
+  ]
+},
+{
+  id:"time", name:"Time", group:"Possession & Build-up",
+  def:"When there is no pressure from the opposition on the player on the ball.",
+  orientation:"attacking", pitch:"two-thirds",
+  variants:[
+    { kind:"INCORRECT", title:"Rushing it",
+      desc:"With space and no pressure, the player still rushes a hurried pass and gives it away.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"a1",team:"red"},{id:"a2",team:"red"},{id:"a3",team:"red"},
+        {id:"d1",team:"blue"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a1:G(.5,.60),ball:G(.5,.62),d1:G(.5,.85),a2:G(.30,.45),a3:G(.70,.45)}},
+        {t:1.2,pos:{ball:G(.42,.52)},ease:"linear"},
+        {t:2.4,pos:{ball:G(.30,.52)}}],
+      pauses:[
+        {t:0,text:"Loads of space — no defender near.",point:"a1",shapes:[{type:"space",at:"a1",r:.12}]},
+        {t:1.2,text:"But rushes a hurried, off-target pass.",point:"a1"},
+        {t:2.4,text:"Gives it away cheaply.",point:"ball"}] },
+    { kind:"CORRECT", title:"Take your time",
+      desc:"Recognizing there's no pressure, the player takes a touch, lifts the head and picks the right pass.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"a1",team:"red"},{id:"a2",team:"red"},{id:"a3",team:"red"},
+        {id:"d1",team:"blue"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a1:G(.5,.60),ball:G(.5,.62),d1:G(.5,.85),a2:G(.30,.45),a3:G(.70,.45)}},
+        {t:1.2,pos:{a1:G(.5,.58),ball:G(.5,.60)}},
+        {t:2.4,pos:{ball:G(.70,.46),a3:G(.70,.45)},ease:"linear"},
+        {t:3.4,pos:{a3:G(.70,.34),ball:G(.70,.36)}}],
+      pauses:[
+        {t:0,text:"Loads of space — no defender near.",point:"a1",shapes:[{type:"space",at:"a1",r:.12}]},
+        {t:1.2,text:"TIME — take a touch, lift your head.",point:"a1"},
+        {t:2.4,text:"Pick the right pass.",point:"a3",shapes:[{type:"lane",from:"a1",to:"a3"}]},
+        {t:3.4,text:"Calm and progressive.",point:"a3"}] }
+  ]
+},
+{
+  id:"man-on", name:"Man On", group:"Possession & Build-up",
+  def:"The opposition is close to the player in possession of the ball.",
+  orientation:"attacking", pitch:"two-thirds",
+  variants:[
+    { kind:"INCORRECT", title:"Turning blind",
+      desc:"Unaware of the tight marker, the receiver tries to turn and is dispossessed from behind.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"a1",team:"red"},{id:"a2",team:"red"},
+        {id:"d1",team:"blue"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a1:G(.5,.68),ball:G(.5,.70),a2:G(.5,.50),d1:G(.5,.44)}},
+        {t:1.2,pos:{ball:G(.5,.52)},ease:"linear"},
+        {t:2.4,pos:{a2:G(.5,.46),ball:G(.5,.48)}},
+        {t:3.4,pos:{ball:G(.5,.46),d1:G(.5,.46)}}],
+      pauses:[
+        {t:0,text:"A defender is tight behind the receiver.",point:"a2"},
+        {t:1.2,text:"Ball into feet — MAN ON.",point:"d1"},
+        {t:2.4,text:"They try to turn anyway.",point:"a2"},
+        {t:3.4,text:"Dispossessed from behind.",point:"d1"}] },
+    { kind:"CORRECT", title:"Shield & play back",
+      desc:"Warned 'man on', the receiver shields and plays first-time back, protecting possession.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"a1",team:"red"},{id:"a2",team:"red"},
+        {id:"d1",team:"blue"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a1:G(.5,.68),ball:G(.5,.70),a2:G(.5,.50),d1:G(.5,.44)}},
+        {t:1.2,pos:{ball:G(.5,.52)},ease:"linear"},
+        {t:2.2,pos:{ball:G(.5,.64)},ease:"linear"},
+        {t:3.4,pos:{ball:G(.70,.60)},ease:"linear"}],
+      pauses:[
+        {t:0,text:"A defender is tight behind — MAN ON.",point:"a2"},
+        {t:1.2,text:"Don't turn into it.",point:"a2"},
+        {t:2.2,text:"Shield and play first-time back.",point:"a2",shapes:[{type:"lane",from:"a2",to:"a1"}]},
+        {t:3.4,text:"Possession protected.",point:"a1"}] }
+  ]
+},
+{
+  id:"recycle", name:"Recycle / Reset", group:"Possession & Build-up",
+  def:"Don't force it forwards. Go backwards and try again.",
+  orientation:"attacking", pitch:"two-thirds",
+  variants:[
+    { kind:"INCORRECT", title:"Forcing the traffic",
+      desc:"Crowded near goal, a low-percentage ball is forced into traffic and turned over.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"a1",team:"red"},{id:"a2",team:"red"},{id:"a3",team:"red"},
+        {id:"d1",team:"blue"},{id:"d2",team:"blue"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a1:G(.55,.40),ball:G(.55,.42),d1:G(.50,.34),d2:G(.62,.36),a2:G(.5,.70),a3:G(.20,.52)}},
+        {t:1.4,pos:{ball:G(.5,.30)},ease:"linear"},
+        {t:2.4,pos:{ball:G(.5,.34),d1:G(.5,.33)}}],
+      pauses:[
+        {t:0,text:"Crowded in a tight area near goal.",point:"a1"},
+        {t:1.4,text:"Forces a low-percentage ball into traffic.",point:"a1"},
+        {t:2.4,text:"Turned over.",point:"d1"}] },
+    { kind:"CORRECT", title:"Recycle & switch",
+      desc:"Recognizing it's blocked, recycle back to a deeper player, switch away from the traffic and attack from a new angle.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"a1",team:"red"},{id:"a2",team:"red"},{id:"a3",team:"red"},
+        {id:"d1",team:"blue"},{id:"d2",team:"blue"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a1:G(.55,.40),ball:G(.55,.42),d1:G(.50,.34),d2:G(.62,.36),a2:G(.5,.70),a3:G(.20,.55)}},
+        {t:1.2,pos:{ball:G(.5,.68)},ease:"linear"},
+        {t:2.2,pos:{ball:G(.24,.60)},ease:"linear"},
+        {t:3.4,pos:{a3:G(.20,.42),ball:G(.20,.44)}}],
+      pauses:[
+        {t:0,text:"Crowded near goal — don't force it.",point:"a1"},
+        {t:1.2,text:"RECYCLE — go back to a deeper player.",point:"a2",shapes:[{type:"lane",from:"a1",to:"a2"}]},
+        {t:2.2,text:"Switch away from the traffic.",point:"a3",shapes:[{type:"lane",from:"a2",to:"a3"}]},
+        {t:3.4,text:"Attack again from a new angle.",point:"a3"}] }
+  ]
+},
+/* ============================ PHASE 12 — ATTACKING & FORWARD PLAY ============================ */
+{
+  id:"turn", name:"Turn", group:"Attacking & Forward Play",
+  def:"Change direction.",
+  orientation:"attacking", pitch:"two-thirds",
+  variants:[
+    { kind:"INCORRECT", title:"Playing back",
+      desc:"With space to turn and the defender far away, the receiver needlessly plays back and wastes the chance.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"a1",team:"red"},{id:"a2",team:"red"},
+        {id:"d1",team:"blue"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a1:G(.5,.70),ball:G(.5,.72),a2:G(.5,.50),d1:G(.5,.30)}},
+        {t:1.2,pos:{ball:G(.5,.52)},ease:"linear"},
+        {t:2.4,pos:{ball:G(.5,.66)},ease:"linear"}],
+      pauses:[
+        {t:0,text:"Space to turn — the defender is far.",point:"a2",shapes:[{type:"space",at:"a2",r:.1}]},
+        {t:1.2,text:"Ball into feet.",point:"a2"},
+        {t:2.4,text:"Plays back instead of turning — chance wasted.",point:"a1"}] },
+    { kind:"CORRECT", title:"Turn into space",
+      desc:"With space ahead, the receiver turns to face forward and progresses the attack.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"a1",team:"red"},{id:"a2",team:"red"},
+        {id:"d1",team:"blue"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a1:G(.5,.70),ball:G(.5,.72),a2:G(.5,.50),d1:G(.5,.30)}},
+        {t:1.2,pos:{ball:G(.5,.52)},ease:"linear"},
+        {t:2.2,pos:{a2:G(.5,.42),ball:G(.5,.44)}},
+        {t:3.2,pos:{a2:G(.5,.28),ball:G(.5,.30)}}],
+      pauses:[
+        {t:0,text:"Space to turn — the defender is far.",point:"a2",shapes:[{type:"space",at:"a2",r:.1}]},
+        {t:1.2,text:"Receives.",point:"a2"},
+        {t:2.2,text:"TURN — face forward into the space.",point:"a2",shapes:[{type:"run",from:G(.5,.50),to:G(.5,.42)}]},
+        {t:3.2,text:"Drives the attack forward.",point:"a2"}] }
+  ]
+},
+{
+  id:"drive", name:"Drive", group:"Attacking & Forward Play",
+  def:"Carry the ball forward.",
+  orientation:"attacking", pitch:"two-thirds",
+  variants:[
+    { kind:"INCORRECT", title:"Passing square",
+      desc:"With open space ahead, the player passes square; the attack stalls and defenders recover.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"a1",team:"red"},{id:"a2",team:"red"},
+        {id:"d1",team:"blue"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a1:G(.5,.60),ball:G(.5,.62),a2:G(.30,.58),d1:G(.5,.35)}},
+        {t:1.4,pos:{ball:G(.32,.58),a2:G(.30,.58),d1:G(.5,.42)},ease:"linear"},
+        {t:2.6,pos:{d1:G(.40,.48)}}],
+      pauses:[
+        {t:0,text:"Open space ahead to run into.",point:"a1",shapes:[{type:"space",at:G(.5,.45),r:.12}]},
+        {t:1.4,text:"Passes square — doesn't attack the space.",point:"a1"},
+        {t:2.6,text:"The attack stalls; defenders recover.",point:"d1"}] },
+    { kind:"CORRECT", title:"Drive forward",
+      desc:"With open space ahead, the player drives at pace into it, committing defenders and advancing.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"a1",team:"red"},{id:"a2",team:"red"},
+        {id:"d1",team:"blue"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a1:G(.5,.60),ball:G(.5,.62),a2:G(.30,.58),d1:G(.5,.35)}},
+        {t:1.4,pos:{a1:G(.5,.46),ball:G(.5,.48)}},
+        {t:2.6,pos:{a1:G(.5,.30),ball:G(.5,.32),d1:G(.5,.34)}},
+        {t:3.4,pos:{a1:G(.5,.20),ball:G(.5,.22)}}],
+      pauses:[
+        {t:0,text:"Open space ahead.",point:"a1",shapes:[{type:"space",at:G(.5,.45),r:.12}]},
+        {t:1.4,text:"DRIVE — carry it forward at pace.",point:"a1",shapes:[{type:"run",from:G(.5,.60),to:G(.5,.46)}]},
+        {t:2.6,text:"Commits the defender, advancing.",point:"a1"},
+        {t:3.4,text:"Deep into the final third.",point:"a1"}] }
+  ]
+},
+{
+  id:"skip", name:"Skip", group:"Attacking & Forward Play",
+  def:"Play past an opposition line of pressure.",
+  orientation:"attacking", pitch:"two-thirds",
+  variants:[
+    { kind:"INCORRECT", title:"Into the line",
+      desc:"The ball is played into the pressing line and turned over.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"a1",team:"red"},{id:"a2",team:"red"},
+        {id:"d1",team:"blue"},{id:"d2",team:"blue"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a1:G(.5,.70),ball:G(.5,.72),d1:G(.40,.55),d2:G(.60,.55),a2:G(.5,.40)}},
+        {t:1.4,pos:{ball:G(.44,.56)},ease:"linear"},
+        {t:2.4,pos:{ball:G(.42,.55),d1:G(.42,.55)}}],
+      pauses:[
+        {t:0,text:"A line of pressure ahead; a teammate beyond it.",point:"a1"},
+        {t:1.4,text:"Plays straight into the line.",point:"a1",shapes:[{type:"lane",from:"a1",to:"d1"}]},
+        {t:2.4,text:"Turned over.",point:"d1"}] },
+    { kind:"CORRECT", title:"Skip the line",
+      desc:"A pass that skips between the pressing line into a teammate beyond it breaks the press.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"a1",team:"red"},{id:"a2",team:"red"},
+        {id:"d1",team:"blue"},{id:"d2",team:"blue"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a1:G(.5,.70),ball:G(.5,.72),d1:G(.40,.55),d2:G(.60,.55),a2:G(.5,.40)}},
+        {t:1.4,pos:{ball:G(.5,.42)},ease:"linear"},
+        {t:2.6,pos:{a2:G(.5,.30),ball:G(.5,.32)}}],
+      pauses:[
+        {t:0,text:"A line of pressure; a teammate beyond it.",point:"a1"},
+        {t:1.4,text:"SKIP the line — pass between them, beyond the press.",point:"a1",shapes:[{type:"lane",from:"a1",to:"a2"}]},
+        {t:2.6,text:"Received beyond the line — the press is broken.",point:"a2"}] }
+  ]
+},
+{
+  id:"advanced-platforms", name:"Advanced Platforms", group:"Attacking & Forward Play",
+  def:"Positive body shape and movement to break lines and go forward.",
+  orientation:"attacking", pitch:"two-thirds",
+  variants:[
+    { kind:"INCORRECT", title:"Square & flat",
+      desc:"The midfielder receives square with no forward intent and recycles sideways; the attack stalls.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"a1",team:"red"},{id:"a2",team:"red",vision:true},
+        {id:"a3",team:"red"},{id:"d1",team:"blue"},{id:"d2",team:"blue"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a1:G(.5,.70),ball:G(.5,.72),a2:G(.5,.55),d1:G(.40,.45),d2:G(.60,.45),a3:G(.5,.30)},face:{a2:G(.5,.95)}},
+        {t:1.4,pos:{ball:G(.5,.57),a2:G(.5,.55)},ease:"linear"},
+        {t:2.4,pos:{ball:G(.5,.68),a1:G(.5,.70)}}],
+      pauses:[
+        {t:0,text:"Midfielder receiving between the lines.",point:"a2"},
+        {t:1.4,text:"Square and flat, facing their own goal — no forward intent.",point:"a2"},
+        {t:2.4,text:"Recycles sideways/back — the attack stalls.",point:"a1"}] },
+    { kind:"CORRECT", title:"Advanced platform",
+      desc:"Showing on the half-turn with positive body shape, the midfielder receives between the lines and drives forward, breaking the line.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"a1",team:"red"},{id:"a2",team:"red",vision:true},
+        {id:"a3",team:"red"},{id:"d1",team:"blue"},{id:"d2",team:"blue"},{id:"ball",kind:"ball"}],
+      keyframes:[
+        {t:0,pos:{gk:G(.5,.06),a1:G(.5,.70),ball:G(.5,.72),a2:G(.55,.55),d1:G(.40,.45),d2:G(.60,.45),a3:G(.40,.30)},face:{a2:G(.45,.28)}},
+        {t:1.4,pos:{ball:G(.54,.56),a2:G(.55,.55)},ease:"linear"},
+        {t:2.4,pos:{a2:G(.5,.42),ball:G(.5,.44)}},
+        {t:3.4,pos:{ball:G(.40,.32),a3:G(.40,.30)},ease:"linear"}],
+      pauses:[
+        {t:0,text:"Show on the half-turn — positive, open body shape.",point:"a2",shapes:[{type:"space",at:"a2",r:.09}]},
+        {t:1.4,text:"Receives side-on, already facing forward.",point:"a2"},
+        {t:2.4,text:"First touch forward — breaks the line.",point:"a2",shapes:[{type:"run",from:G(.55,.55),to:G(.5,.42)}]},
+        {t:3.4,text:"Plays forward — the attack progresses.",point:"a3",shapes:[{type:"lane",from:"a2",to:"a3"}]}] }
+  ]
 }
 ];
 
 // The one Our-Team player each scenario focuses on — drawn with a "YOU" label + accent ring.
 const FOCUS = { "touch-tight":"d1","press":"d1","cover":"d2","compact":"d4","goal-side":"d1",
-  "delay":"d1","check-in-out":"a1","switch":"a1","overloads":"a1","half-turn":"a1" };
+  "delay":"d1","check-in-out":"a1","switch":"a1","overloads":"a1","half-turn":"a1",
+  // Phase 12 — defending
+  "hunt":"d1","hold":"d2","shift":"d2","drop":"m1",
+  // Phase 12 — possession & build-up
+  "secure":"a1","support":"a1","disperse":"a1","balance":"a4","set":"a2","bounce":"a2",
+  "punch":"a1","weight":"a1","passing-angle":"a2","time":"a1","man-on":"a2","recycle":"a1",
+  // Phase 12 — attacking & forward play
+  "turn":"a2","drive":"a1","skip":"a1","advanced-platforms":"a2" };
 
 /* ========================================================== ENGINE =========== */
 const easeInOut = t => t<.5 ? 2*t*t : 1-Math.pow(-2*t+2,2)/2;
@@ -999,7 +1691,7 @@ const scrub=document.getElementById('scrub');
 const timeEl=document.getElementById('time');
 const search=document.getElementById('search');
 const termSelect=document.getElementById('termSelect');
-const GROUP_ORDER=["Defending","Attacking"];
+const GROUP_ORDER=["Defending","Possession & Build-up","Attacking & Forward Play"];
 
 function buildTermList(filter=""){
   termlist.innerHTML="";
