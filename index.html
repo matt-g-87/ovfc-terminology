@@ -6,9 +6,10 @@
 <title>OVFC Terminology Trainer</title>
 <style>
   :root{
-    --bg:#0f1720; --panel:#16212e; --panel2:#1d2b3a; --ink:#eef4fb; --muted:#9fb2c6;
-    --line:#2a3a4d; --red:#e23b3b; --blue:#2f6fe0; --good:#26c281; --bad:#f0a32a;
-    --accent:#39b0ff;
+    /* OVFC black & gold theme. Team colours (--red/--blue) stay as the selectable defaults. */
+    --bg:#0c0c0e; --panel:#161616; --panel2:#201f1c; --ink:#f6f1e3; --muted:#a79e88;
+    --line:#34302a; --red:#e23b3b; --blue:#2f6fe0; --good:#26c281; --bad:#f0a32a;
+    --accent:#e7b83c;
   }
   *{box-sizing:border-box}
   html,body{margin:0;height:100%}
@@ -20,7 +21,7 @@
   .app{display:flex;flex-direction:column;height:100dvh;height:100vh}
   header{
     display:flex;align-items:center;gap:10px;padding:10px 14px;
-    background:linear-gradient(90deg,#13202e,#172b3f);border-bottom:1px solid var(--line);
+    background:linear-gradient(90deg,#0a0a0b,#17150f);border-bottom:2px solid var(--accent);
     flex:0 0 auto;
   }
   header .logo{width:26px;height:26px;border-radius:6px;background:radial-gradient(circle at 30% 30%,#fff,#cfe);position:relative;flex:0 0 auto}
@@ -53,7 +54,7 @@
   .termbtn{display:block;width:100%;text-align:left;border:1px solid transparent;background:transparent;
     color:var(--ink);padding:8px 10px;border-radius:8px;cursor:pointer;font-size:14px;margin-bottom:2px}
   .termbtn:hover{background:var(--panel2)}
-  .termbtn.active{background:#23415f;border-color:#356ea3}
+  .termbtn.active{background:#2a2410;border-color:var(--accent);color:#fff}
   /* mobile term dropdown — hidden on desktop, shown in the mobile media query */
   .termselect{display:none;width:100%;padding:9px 10px;border-radius:8px;border:1px solid var(--line);
     background:var(--panel2);color:var(--ink);font-size:15px}
@@ -76,8 +77,9 @@
   canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
   /* hidden debug inspector */
   .debugpanel{position:absolute;top:8px;left:8px;z-index:5;display:none;
-    background:rgba(8,14,20,.92);border:1px solid var(--accent);border-radius:8px;padding:8px 10px;
-    font:12px/1.5 ui-monospace,Menlo,Consolas,monospace;color:#cfe;max-width:250px;white-space:pre;pointer-events:none}
+    background:rgba(8,8,10,.92);border:1px solid var(--accent);border-radius:8px;padding:8px 10px;
+    font:12px/1.5 ui-monospace,Menlo,Consolas,monospace;color:#f3e6bf;max-width:250px;white-space:pre;
+    user-select:text;-webkit-user-select:text;cursor:text}
   .stage.debug .debugpanel{display:block}
   .stage.debug canvas{cursor:crosshair}
   .anno{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);max-width:min(620px,92%);
@@ -95,12 +97,12 @@
   .controls{flex:0 0 auto;display:flex;align-items:center;gap:12px;padding:10px 16px;flex-wrap:wrap}
   .btn{appearance:none;border:1px solid var(--line);background:var(--panel2);color:var(--ink);
     width:42px;height:42px;border-radius:10px;cursor:pointer;font-size:18px;display:grid;place-items:center;flex:0 0 auto}
-  .btn:hover{background:#26384b}
+  .btn:hover{background:#2a2820}
   .scrubwrap{flex:1 1 220px;display:flex;align-items:center;gap:8px;min-width:160px}
   .time{font-variant-numeric:tabular-nums;color:var(--muted);font-size:12px;flex:0 0 auto;min-width:74px;text-align:right}
   .speed{display:flex;align-items:center;gap:8px;flex:0 0 auto;color:var(--muted);font-size:13px}
   input[type=range]{-webkit-appearance:none;appearance:none;height:6px;border-radius:6px;
-    background:#2a3a4d;outline:none;cursor:pointer}
+    background:#34302a;outline:none;cursor:pointer}
   input[type=range].scrub{flex:1}
   input[type=range].spd{width:118px}
   input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;
@@ -227,15 +229,15 @@ const TERMS = [
       entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"d1",team:"blue"},
         {id:"a1",team:"red"},{id:"a2",team:"red"},{id:"d2",team:"blue"},{id:"thr",team:"red"},{id:"ball",kind:"ball"}],
       keyframes:[
-        {t:0,pos:{gk:G(.5,.06),d1:G(.63,.35),a1:G(.5,.42),a2:G(.80,.55),d2:G(.74,.48),thr:G(.02,.42),ball:G(.03,.42)}},
+        {t:0,pos:{gk:G(.5,.06),d1:G(.21,.27),a1:G(.5,.42),a2:G(.80,.55),d2:G(.74,.48),thr:G(.02,.42),ball:G(.03,.42)}},
         {t:1.4,pos:{ball:G(.5,.44),thr:G(.10,.44)},ease:"linear"},
-        {t:2.8,pos:{a1:G(.40,.30),ball:G(.40,.32),d1:G(.55,.42)}},
-        {t:4.2,pos:{a1:G(.44,.12),ball:G(.42,.05),d1:G(.50,.30)},ease:"linear"}],
+        {t:2.8,pos:{a1:G(.59,.27),ball:G(.59,.29),d1:G(.33,.29)}},
+        {t:4.2,pos:{a1:G(.56,.10),ball:G(.58,.02),d1:G(.33,.29)},ease:"linear"}],
       pauses:[
         {t:0,text:"The defender marks the ZONE, not the player.",point:"d1"},
-        {t:1.4,text:"The attacker is left unmarked to receive.",point:"a1"},
-        {t:2.8,text:"They trail the attacker — but a full step behind.",point:"d1",shapes:[{type:"run",from:"d1",to:"a1"}]},
-        {t:4.2,text:"Can't catch up — the attacker drives in and scores.",point:"a1"}] },
+        {t:1.4,text:"The attacker receives, unmarked.",point:"a1"},
+        {t:2.8,text:"The attacker carries to the right; the zonal defender barely shifts and never picks them up.",point:"d1",shapes:[{type:"space",at:"a1",r:.1}]},
+        {t:4.2,text:"Free to run in and finish to the keeper's right.",point:"a1"}] },
     { kind:"CORRECT", title:"Touch tight",
       desc:"Goal-side and within a stride, between attacker and ball. The receiver gets no time and is forced backward.",
       throwIn:{side:"left",label:"Opponent Throw",until:1.4},
@@ -330,33 +332,45 @@ const TERMS = [
 },
 {
   id:"compact", name:"Compact", group:"Defending",
-  def:"Get tight together as a unit to control time and space between the lines.",
+  def:"Get tight together as a unit to control time and space — here, defending a corner.",
   orientation:"defending", pitch:"two-thirds",
   variants:[
-    { kind:"INCORRECT", title:"Stretched apart",
-      desc:"A big gap opens between the back line and midfield. The attacker receives in the hole, turns, and attacks.",
-      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"d1",team:"blue"},{id:"d2",team:"blue"},
-        {id:"m1",team:"blue"},{id:"a1",team:"red"},{id:"a2",team:"red"},{id:"ball",kind:"ball"}],
+    { kind:"INCORRECT", title:"Spread out at a corner",
+      desc:"Defending a corner with the unit spread far from goal: the cross finds a free attacker, a simple pass beats the non-existent block, and it's tapped in.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},
+        {id:"d1",team:"blue"},{id:"d2",team:"blue"},{id:"d3",team:"blue"},{id:"d4",team:"blue"},{id:"d5",team:"blue"},
+        {id:"a1",team:"red"},{id:"a2",team:"red"},{id:"a3",team:"red"},{id:"a4",team:"red"},{id:"a5",team:"red"},
+        {id:"ball",kind:"ball"}],
       keyframes:[
-        {t:0,pos:{gk:G(.5,.06),d1:G(.38,.25),d2:G(.62,.25),m1:G(.5,.62),a1:G(.5,.42),a2:G(.5,.70),ball:G(.5,.72)}},
-        {t:1.4,pos:{ball:G(.5,.45),a1:G(.5,.43)},ease:"linear"},
-        {t:2.8,pos:{a1:G(.5,.30),ball:G(.5,.32)}}],
+        {t:0,pos:{gk:G(.5,.05),a5:G(.03,.03),ball:G(.03,.03),
+          a1:G(.36,.20),a2:G(.48,.16),a3:G(.58,.18),a4:G(.66,.24),
+          d1:G(.30,.50),d2:G(.45,.55),d3:G(.58,.52),d4:G(.70,.46),d5:G(.52,.66)}},
+        {t:1.6,pos:{ball:G(.48,.18)},ease:"linear"},
+        {t:2.8,pos:{ball:G(.58,.18)},ease:"linear"},
+        {t:3.8,pos:{ball:G(.54,.02),a3:G(.56,.10)}}],
       pauses:[
-        {t:0,text:"Big gap between the back line and midfield.",point:"a1",shapes:[{type:"space",at:G(.5,.49),r:.12}]},
-        {t:1.4,text:"The attacker receives in the hole — free.",point:"a1"},
-        {t:2.8,text:"Turns and runs at the back line.",point:"a1"}] },
-    { kind:"CORRECT", title:"Compact unit",
-      desc:"The lines squeeze together. There is no space to receive between them, so the attack is forced backward.",
-      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"d1",team:"blue"},{id:"d2",team:"blue"},
-        {id:"m1",team:"blue"},{id:"a1",team:"red"},{id:"a2",team:"red"},{id:"ball",kind:"ball"}],
+        {t:0,text:"Defending a corner — but the unit is spread far from goal, nobody protecting the box.",point:"d4",shapes:[{type:"space",at:G(.5,.18),r:.16}]},
+        {t:1.6,text:"The cross finds an attacker easily — too many free options.",point:"a2"},
+        {t:2.8,text:"A simple pass to an open attacker — no compact unit blocking the lane.",point:"a3",shapes:[{type:"lane",from:"a2",to:"a3"}]},
+        {t:3.8,text:"Tap-in. Goal.",point:"a3"}] },
+    { kind:"CORRECT", title:"Compact at a corner",
+      desc:"Compact corner defence: a defender on each post and everyone else marking tight and goal-side, so the cross is cut out and booted clear.",
+      entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},
+        {id:"d1",team:"blue"},{id:"d2",team:"blue"},{id:"d3",team:"blue"},{id:"d4",team:"blue"},{id:"d5",team:"blue"},
+        {id:"a1",team:"red"},{id:"a2",team:"red"},{id:"a3",team:"red"},{id:"a4",team:"red"},{id:"a5",team:"red"},
+        {id:"ball",kind:"ball"}],
       keyframes:[
-        {t:0,pos:{gk:G(.5,.06),d1:G(.40,.40),d2:G(.60,.40),m1:G(.5,.52),a1:G(.5,.47),a2:G(.5,.70),ball:G(.5,.72)}},
-        {t:1.4,pos:{ball:G(.5,.62),m1:G(.5,.56)}},
-        {t:2.8,pos:{ball:G(.5,.74),a2:G(.5,.74)}}],
+        {t:0,pos:{gk:G(.5,.05),a5:G(.03,.03),ball:G(.03,.03),
+          a1:G(.36,.20),a2:G(.48,.16),a3:G(.58,.18),a4:G(.66,.24),
+          d1:G(.43,.03),d2:G(.57,.03),d3:G(.37,.15),d4:G(.50,.12),d5:G(.65,.18)}},
+        {t:1.6,pos:{ball:G(.50,.14)},ease:"linear"},
+        {t:2.6,pos:{ball:G(.50,.16),d4:G(.50,.15)}},
+        {t:3.8,pos:{ball:G(.58,.55),d4:G(.52,.22)},ease:"linear"}],
       pauses:[
-        {t:0,text:"Lines squeezed together — compact, no space between.",point:"m1",shapes:[{type:"lane",from:"m1",to:"d1"}]},
-        {t:1.4,text:"Nowhere to play between the lines.",point:"a1"},
-        {t:2.8,text:"Attack forced backward.",point:"a2"}] }
+        {t:0,text:"Compact: a defender on each post, the rest marking tight and goal-side.",point:"d4",shapes:[{type:"lane",from:"d1",to:"d2"}]},
+        {t:1.6,text:"The cross comes in — but every attacker is marked and both posts are covered.",point:"d4"},
+        {t:2.6,text:"A defender attacks the ball and wins it.",point:"d4",shapes:[{type:"space",at:"d4",r:.09}]},
+        {t:3.8,text:"Booted clear out of the box — danger over.",point:"ball"}] }
   ]
 },
 {
@@ -372,12 +386,12 @@ const TERMS = [
         {t:0,pos:{gk:G(.5,.06),a2:G(.18,.52),ball:G(.18,.54),d2:G(.28,.50),a1:G(.58,.42),d1:G(.52,.47)},face:{d1:G(.18,.53)}},
         {t:1.4,pos:{a1:G(.64,.26),d1:G(.56,.40),d2:G(.26,.48)}},
         {t:2.6,pos:{ball:G(.60,.24),a1:G(.64,.20),d1:G(.58,.34)},ease:"linear"},
-        {t:3.8,pos:{a1:G(.55,.08),ball:G(.50,.02),d1:G(.58,.26)},ease:"linear"}],
+        {t:3.8,pos:{a1:G(.55,.08),ball:G(.50,.02),d1:G(.58,.26)},face:{d1:G(.55,0)},ease:"linear"}],
       pauses:[
         {t:0,text:"Defender is ball-watching, on the wrong side of their mark.",point:"d1"},
         {t:1.4,text:"The attacker spins in behind; the defender trails, a step slow.",point:"a1",shapes:[{type:"run",from:G(.58,.42),to:G(.64,.26)}]},
         {t:2.6,text:"A loose press forces the pass — released in behind.",point:"ball",shapes:[{type:"lane",from:"a2",to:"a1"}]},
-        {t:3.8,text:"Can't catch up — a free run on goal, and they score.",point:"a1"}] },
+        {t:3.8,text:"Beaten — they can only turn and watch it go in.",point:"a1"}] },
     { kind:"CORRECT", title:"Stay goal-side",
       desc:"The defender stays between attacker and our goal, tracks the run, and gets to the ball first — while a teammate loosely pressures the passer.",
       entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"d1",team:"blue",vision:true},{id:"d2",team:"blue"},
@@ -387,9 +401,9 @@ const TERMS = [
         {t:1.4,pos:{a1:G(.62,.34),d1:G(.60,.27),d2:G(.26,.48)},face:{d1:G(.45,.42)}},
         {t:2.6,pos:{ball:G(.54,.30),d1:G(.54,.27)},ease:"linear"}],
       pauses:[
-        {t:0,text:"Defender stays GOAL-SIDE; a teammate loosely pressures the ball.",point:"d1",shapes:[{type:"lane",from:"d1",to:G(.5,0)}]},
-        {t:1.4,text:"Tracks the run, always closer to goal.",point:"d1"},
-        {t:2.6,text:"The forced pass runs to them first — goal protected.",point:"d1",shapes:[{type:"lane",from:"a2",to:"a1"}]}] }
+        {t:0,text:"Goal-side: sitting between attacker and goal takes away the THROUGH PASS in behind.",point:"d1",shapes:[{type:"lane",from:"d1",to:G(.5,0)}]},
+        {t:1.4,text:"Deeper than the attacker, you also have more time to read and step to any pass.",point:"d1"},
+        {t:2.6,text:"The pass can only come to your feet — you intercept and protect the goal.",point:"d1",shapes:[{type:"lane",from:"a2",to:"a1"}]}] }
   ]
 },
 {
@@ -403,9 +417,9 @@ const TERMS = [
         {id:"a1",team:"red"},{id:"ball",kind:"ball"}],
       keyframes:[
         {t:0,pos:{gk:G(.5,.06),a1:G(.5,.70),ball:G(.5,.73),d1:G(.5,.45),d2:G(.30,.85)}},
-        {t:1.2,pos:{d1:G(.5,.60),a1:G(.60,.62),ball:G(.60,.64)}},
-        {t:2.6,pos:{a1:G(.58,.40),ball:G(.58,.42),d1:G(.55,.55),d2:G(.35,.66)}},
-        {t:3.8,pos:{a1:G(.52,.10),ball:G(.48,.03),d1:G(.56,.40)},ease:"linear"}],
+        {t:1.2,pos:{d1:G(.5,.60),a1:G(.60,.62),ball:G(.60,.64),d2:G(.36,.74)}},
+        {t:2.6,pos:{a1:G(.58,.40),ball:G(.58,.42),d1:G(.55,.55),d2:G(.42,.60)}},
+        {t:3.8,pos:{a1:G(.52,.10),ball:G(.48,.03),d1:G(.56,.40),d2:G(.48,.42)},ease:"linear"}],
       pauses:[
         {t:0,text:"Outnumbered — a teammate is still recovering (far).",point:"d2"},
         {t:1.2,text:"The defender dives in and is beaten.",point:"d1"},
@@ -417,8 +431,8 @@ const TERMS = [
         {id:"a1",team:"red"},{id:"ball",kind:"ball"}],
       keyframes:[
         {t:0,pos:{gk:G(.5,.06),a1:G(.5,.70),ball:G(.5,.73),d1:G(.5,.45),d2:G(.30,.85)}},
-        {t:1.2,pos:{d1:G(.5,.58),a1:G(.5,.66),ball:G(.5,.68)}},
-        {t:2.8,pos:{d1:G(.40,.52),a1:G(.36,.56),ball:G(.36,.58),d2:G(.42,.66)}},
+        {t:1.2,pos:{d1:G(.5,.58),a1:G(.5,.66),ball:G(.5,.68),d2:G(.36,.76)}},
+        {t:2.8,pos:{d1:G(.40,.52),a1:G(.36,.56),ball:G(.36,.58),d2:G(.42,.62)}},
         {t:4.2,pos:{a1:G(.26,.55),ball:G(.26,.57),d1:G(.30,.50),d2:G(.48,.40)}}],
       pauses:[
         {t:0,text:"Outnumbered — a teammate is still recovering.",point:"d2"},
@@ -574,7 +588,7 @@ const TERMS = [
 ];
 
 // The one Our-Team player each scenario focuses on — drawn with a "YOU" label + accent ring.
-const FOCUS = { "touch-tight":"d1","press":"d1","cover":"d2","compact":"m1","goal-side":"d1",
+const FOCUS = { "touch-tight":"d1","press":"d1","cover":"d2","compact":"d4","goal-side":"d1",
   "delay":"d1","check-in-out":"a1","switch":"a1","overloads":"a1","half-turn":"a1" };
 
 /* ========================================================== ENGINE =========== */
@@ -1043,10 +1057,10 @@ function setScrubTicks(){
   for(const m of marks){
     const a=Math.max(0,m-w), b=Math.min(100,m+w);
     if(a<cur) continue;
-    g+=`,#2a3a4d ${cur}%,#2a3a4d ${a}%,#f0a32a ${a}%,#f0a32a ${b}%`;
+    g+=`,#34302a ${cur}%,#34302a ${a}%,#f0a32a ${a}%,#f0a32a ${b}%`;
     cur=b;
   }
-  g+=`,#2a3a4d ${cur}%,#2a3a4d 100%)`;
+  g+=`,#34302a ${cur}%,#34302a 100%)`;
   scrub.style.background=g;
 }
 
