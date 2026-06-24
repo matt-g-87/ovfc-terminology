@@ -30,6 +30,13 @@ function onPitch(p){ // allow a little slack for the goal/keeper drawn just beyo
   const terms = await b.eval(`window.OVFC.TERMS.map(t=>({id:t.id,n:t.variants.length}))`);
   check(terms.length>=10, `at least 10 terms present (got ${terms.length})`);
 
+  // 0a) Phase 9 defaults: fresh profile → Our-Team colour is black; selecting a term
+  //     (no explicit variant) defaults to the CORRECT variant.
+  check((await b.eval(`window.OVFC.S.colors.us`))==="#111111", 'default Our-Team colour is black on a fresh load');
+  await b.eval(`(window.OVFC.selectById("touch-tight"), 1)`);
+  check((await b.eval(`window.OVFC.S.term.variants[window.OVFC.S.vIndex].kind`))==="CORRECT",
+    'selecting a term defaults to the CORRECT variant');
+
   // 1) Drive EVERY term/variant through its whole timeline from t=0, like pressing Play.
   //    dwellBase=0 makes the auto-cycle flow straight through stages (no 8s holds) so the
   //    sweep is fast. Assert: no exceptions, all positions finite & on-pitch, the clock

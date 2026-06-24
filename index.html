@@ -25,8 +25,7 @@
     flex:0 0 auto;
   }
   header .logo{height:30px;width:auto;object-fit:contain;flex:0 0 auto;display:block}
-  header h1{font-size:16px;margin:0;font-weight:700;letter-spacing:.2px}
-  header .sub{color:var(--muted);font-size:12px;margin-left:2px}
+  header h1{font-size:16px;margin:0;font-weight:700;letter-spacing:.2px;white-space:nowrap}
   header .spacer{flex:1}
   header .teamcolors{display:flex;gap:14px;font-size:12px;color:var(--muted)}
   header .teamcolors label{display:flex;align-items:center;gap:6px;cursor:pointer}
@@ -112,15 +111,19 @@
     .sidebar{border-right:none;border-bottom:1px solid var(--line);overflow:visible;padding:8px 10px}
     #termlist,.search{display:none}        /* hide the desktop list + search on phone */
     .termselect{display:block}             /* show the dropdown */
+    header h1{font-size:15px}
     header .teamcolors{gap:10px}
-    .def{padding:10px 14px}
-    .def h2{font-size:18px}
+    .def{padding:8px 14px}
+    .def h2{display:none}                    /* term name already shown in the dropdown */
     /* clamp AND reserve exactly 2 lines so def height is constant across terms (stable pitch) */
-    .def p{margin-top:3px;display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;
+    .def p{margin-top:0;display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;
       overflow:hidden;min-height:2.9em;line-height:1.45}
-    .tabs{flex-wrap:nowrap;overflow-x:auto;padding-bottom:2px}   /* single row, never wraps */
-    .tab{flex:0 0 auto}
-    .stage{margin:8px 10px 0}
+    /* segmented variant row: equal-width, one line, no scroll (short labels) */
+    .tabs{flex-wrap:nowrap;overflow:visible;gap:4px;padding:8px 10px 0}
+    .tab{flex:1 1 0;min-width:0;justify-content:center;text-align:center;font-size:12px;padding:7px 4px;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .tab .vttl{display:none}                 /* hide the "— title" suffix; keep short kind label */
+    .stage{margin:6px 6px 0}                 /* tighter margins → wider/taller pitch */
     .controls{padding:9px 12px;gap:10px}
     .desc{padding:8px 14px 12px;height:74px;max-height:none}     /* fixed height → stable stage */
   }
@@ -136,7 +139,6 @@
   <header>
     <img class="logo" id="logo" alt="Ottawa Valley Football Club">
     <h1>OVFC Terminology Trainer</h1>
-    <span class="sub">trigger words, shown on the pitch</span>
     <span class="spacer"></span>
     <div class="teamcolors">
       <label title="Our team colour"><input type="color" id="colUs"><span class="cap">Our team</span></label>
@@ -653,7 +655,7 @@ function pauseAt(comp,t){
 }
 
 /* ----- team colours ("our team" / "their team", user-selectable, persisted) ----- */
-const DEFAULT_COLORS = { us:"#2f6fe0", them:"#e23b3b" };   // our team = Blue, their team = Red
+const DEFAULT_COLORS = { us:"#111111", them:"#e23b3b" };   // our team = Black, their team = Red
 function loadColors(){ try{ const s=JSON.parse(localStorage.getItem("ovfc-colors")); if(s&&s.us&&s.them) return {us:s.us,them:s.them}; }catch(e){} return {...DEFAULT_COLORS}; }
 function saveColors(){ try{ localStorage.setItem("ovfc-colors", JSON.stringify(S.colors)); }catch(e){} }
 // A term's `orientation` says whether WE attack or defend, so "us" is the side that matches it.
@@ -777,7 +779,8 @@ function resize(){
 function computeRect(){
   const v=S.term?S.term.variants[S.vIndex]:null;
   const R = (S.term && S.term.pitch==="half")?1.0:1.2;     // field height:width
-  const pad=18, gpad=22;                                    // gpad: room for goal beyond field
+  const narrow=cssW<520;                                    // phones: use more of the stage
+  const pad=narrow?8:18, gpad=narrow?14:22;                 // gpad: room for goal beyond field
   const availW=Math.max(40,cssW-pad*2), availH=Math.max(40,cssH-gpad*2);
   let w=Math.min(availW,availH/R), h=w*R;
   rect={x:(cssW-w)/2, y:(cssH-h)/2, w, h};
@@ -1023,20 +1026,30 @@ function buildTermSelect(){
 }
 function selectTerm(t){
   nameEl.textContent=t.name; defEl.textContent=t.def;
-  loadVariant(t,0);
+  loadVariant(t, Math.max(0, t.variants.findIndex(v=>v.kind==="CORRECT")));   // default to Correct
   for(const b of termlist.querySelectorAll('.termbtn')) b.classList.toggle('active', b.dataset.id===t.id);
   if(termSelect.value!==t.id) termSelect.value=t.id;
 }
+// display order: CORRECT first (leftmost), then the INCORRECTs in data order
+function tabOrder(){
+  return S.term.variants.map((v,i)=>i).sort((a,b)=>
+    (S.term.variants[a].kind==="CORRECT"?0:1) - (S.term.variants[b].kind==="CORRECT"?0:1));
+}
 function buildTabs(){
   tabsEl.innerHTML="";
-  S.term.variants.forEach((v,i)=>{
+  const incCount=S.term.variants.filter(v=>v.kind!=="CORRECT").length;
+  let incN=0;
+  for(const i of tabOrder()){
+    const v=S.term.variants[i], good=v.kind==="CORRECT";
+    // short label for the segmented mobile row; numbered only when there are 2+ incorrects
+    let kind = good ? "Correct" : (incCount>1 ? "Incorrect "+(++incN) : "Incorrect");
     const b=document.createElement('button');
-    const good=v.kind==="CORRECT";
     b.className="tab "+(good?"good":"bad")+(i===S.vIndex?" active":"");
-    b.innerHTML=`<span class="dot" style="background:${good?"var(--good)":"var(--bad)"}"></span>${v.kind==="CORRECT"?"Correct":"Incorrect"} — ${v.title}`;
+    b.innerHTML=`<span class="dot" style="background:${good?"var(--good)":"var(--bad)"}"></span>`
+      +`<span class="vkind">${kind}</span><span class="vttl"> — ${v.title}</span>`;
     b.onclick=()=>loadVariant(S.term,i);
     tabsEl.appendChild(b);
-  });
+  }
 }
 function updateDesc(){
   const v=S.term.variants[S.vIndex];
