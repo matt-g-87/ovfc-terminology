@@ -74,6 +74,12 @@
   .stage{position:relative;flex:1 1 auto;min-height:0;margin:10px 16px 0;border-radius:12px;
     overflow:hidden;background:#0b141d;border:1px solid var(--line)}
   canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+  /* hidden debug inspector */
+  .debugpanel{position:absolute;top:8px;left:8px;z-index:5;display:none;
+    background:rgba(8,14,20,.92);border:1px solid var(--accent);border-radius:8px;padding:8px 10px;
+    font:12px/1.5 ui-monospace,Menlo,Consolas,monospace;color:#cfe;max-width:250px;white-space:pre;pointer-events:none}
+  .stage.debug .debugpanel{display:block}
+  .stage.debug canvas{cursor:crosshair}
   .anno{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);max-width:min(620px,92%);
     background:rgba(10,18,26,.86);border:1px solid var(--line);backdrop-filter:blur(3px);
     color:#fff;padding:9px 14px;border-radius:10px;font-size:15px;text-align:center;line-height:1.35;
@@ -115,7 +121,7 @@
     .def{padding:10px 14px}
     .def h2{font-size:18px}
     /* clamp AND reserve exactly 2 lines so def height is constant across terms (stable pitch) */
-    .def p{margin-top:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+    .def p{margin-top:3px;display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;
       overflow:hidden;min-height:2.9em;line-height:1.45}
     .tabs{flex-wrap:nowrap;overflow-x:auto;padding-bottom:2px}   /* single row, never wraps */
     .tab{flex:0 0 auto}
@@ -158,6 +164,7 @@
       <div class="tabs" id="tabs"></div>
       <div class="stage" id="stage">
         <canvas id="cv"></canvas>
+        <div class="debugpanel" id="debugPanel"></div>
         <div class="anno" id="anno"><span class="badge"></span><span id="annoText"></span></div>
       </div>
       <div class="controls">
@@ -614,6 +621,7 @@ function sampleFace(comp,id,t){
   return F[F.length-1].face[id];
 }
 function samplePos(comp,id,t){
+  if(S.debug && S.debugPos[id]) return S.debugPos[id];   // debug drag override (paused editing only)
   const F=comp.frames;
   if(!F.length) return [0.5,0.5];
   if(t<=F[0].t) return F[0].pos[id];
@@ -655,7 +663,8 @@ function readableOn(hex){ const c=hex.replace('#',''); const r=parseInt(c.slice(
    stage and park. dwellBase is test-overridable (0 ⇒ pp==t, linear). */
 const EPS = 0.001;
 const S = { term:null, vIndex:0, comp:null, t:0, pp:0, playing:false, speed:1, scrubbing:false,
-  lastNow:null, colors:loadColors(), dwellBase:8, seekTarget:null };
+  lastNow:null, colors:loadColors(), dwellBase:8, seekTarget:null,
+  debug:false, sel:null, debugPos:{}, dragging:false };
 
 function buildPP(comp){               // build the pp segment map using the current dwellBase
   const dur=comp.duration, db=S.dwellBase;
@@ -686,11 +695,12 @@ function playFrac(){ return S.comp&&S.comp.ppTotal ? S.pp/S.comp.ppTotal : 0; }
 function loadVariant(term,vIndex){
   S.term=term; S.vIndex=vIndex; S.comp=compileVariant(term.variants[vIndex]);
   buildPP(S.comp);
-  S.t=0; S.pp=0; S.playing=false; S.seekTarget=null;
+  S.t=0; S.pp=0; S.playing=false; S.seekTarget=null; S.debugPos={}; S.sel=null;
   buildTabs(); updateDesc(); updatePlayBtn(); setScrubTicks(); render();
 }
 function play(){
   if(!S.comp) return;
+  S.debugPos={};                                // discard any debug drags before moving
   if(S.pp>=S.comp.ppTotal-1e-6) S.pp=0;        // replay from start at the end
   S.seekTarget=null;
   const seg=segAt(S.comp,S.pp);                // if parked on a dwell, skip its hold so we move now
@@ -716,20 +726,30 @@ function tick(realDt){
 }
 function seekFraction(f){
   if(!S.comp) return;
-  S.playing=false; S.seekTarget=null;
+  S.playing=false; S.seekTarget=null; S.debugPos={};
   S.pp=Math.max(0,Math.min(1,f))*S.comp.ppTotal; S.t=ppToT(S.comp,S.pp);
 }
 function nextStage(){          // animate forward to the next stage, then park
   if(!S.comp) return;
+  S.debugPos={};
   const p=S.comp.pauses.find(p=>p.t>S.t+EPS);
   S.seekTarget = p ? p.t : S.comp.duration;
   S.playing=true; updatePlayBtn();
 }
 function prevStage(){          // animate back to the previous stage, then park
   if(!S.comp) return;
+  S.debugPos={};
   let target=0;
   for(const p of S.comp.pauses){ if(p.t<S.t-EPS) target=p.t; else break; }
   S.seekTarget=target; S.playing=true; updatePlayBtn();
+}
+// sequence number with decimal between stages (1, 1.4, 2, …) for the debug panel
+function seqNumber(){
+  const ps=S.comp?S.comp.pauses:[]; if(!ps.length) return 0;
+  let i=0; for(let k=0;k<ps.length;k++) if(ps[k].t<=S.t+EPS) i=k;
+  let seq=i+1;
+  if(i<ps.length-1){ const span=ps[i+1].t-ps[i].t||1e-6; seq=(i+1)+Math.min(1,Math.max(0,(S.t-ps[i].t)/span)); }
+  return seq;
 }
 
 /* ========================================================== RENDER =========== */
@@ -756,6 +776,11 @@ function computeRect(){
 function project(x,y){
   const yy = (S.term && S.term.orientation==="defending") ? (1-y) : y;
   return [rect.x+x*rect.w, rect.y+yy*rect.h];
+}
+function invProject(cx,cy){            // canvas px → pitch coords (inverse of project)
+  let x=(cx-rect.x)/rect.w, yy=(cy-rect.y)/rect.h;
+  const y=(S.term && S.term.orientation==="defending") ? 1-yy : yy;
+  return [Math.max(0,Math.min(1,x)), Math.max(0,Math.min(1,y))];
 }
 function P(ref,t){ return Array.isArray(ref)?project(ref[0],ref[1]):(()=>{const p=samplePos(S.comp,ref,t);return project(p[0],p[1]);})(); }
 
@@ -889,6 +914,28 @@ function drawThrowIn(){
   ctx.fillStyle="#fff"; ctx.fillText(text,x,y);
   ctx.restore();
 }
+function drawDebugSelection(){
+  if(!S.sel) return;
+  const p=samplePos(S.comp,S.sel,S.t), c=project(p[0],p[1]);
+  const R=Math.max(11,rect.w*0.036);
+  ctx.save(); ctx.lineWidth=2.5; ctx.strokeStyle="#ff3df0"; ctx.setLineDash([3,3]);
+  ctx.beginPath(); ctx.arc(c[0],c[1],R+7,0,7); ctx.stroke(); ctx.restore();
+}
+function updateDebugPanel(){
+  const L=[];
+  L.push(`DEBUG · ${S.playing?"playing (pause to drag)":"paused"}`);
+  L.push(`term ${S.term.id} v${S.vIndex} ${S.term.variants[S.vIndex].kind}`);
+  L.push(`seq  ${seqNumber().toFixed(2)}  (t ${S.t.toFixed(2)}/${S.comp.duration.toFixed(2)})`);
+  if(S.sel){
+    const e=S.comp.entities.find(x=>x.id===S.sel);
+    const p=samplePos(S.comp,S.sel,S.t);
+    L.push(`sel  ${S.sel}${e&&e.team?" ["+e.team+"]":""}${FOCUS[S.term.id]===S.sel?" YOU":""}`);
+    L.push(`pos  G(${p[0].toFixed(2)},${p[1].toFixed(2)})`);
+    const ft=sampleFace(S.comp,S.sel,S.t);
+    if(ft) L.push(`face G(${ft[0].toFixed(2)},${ft[1].toFixed(2)})`);
+  } else { L.push(`tap a circle to select; drag to move`); }
+  debugPanel.textContent=L.join("\n");
+}
 function render(){
   ctx.clearRect(0,0,cssW,cssH);
   if(!S.term){ return; }
@@ -900,6 +947,7 @@ function render(){
   for(const e of S.comp.entities) if(e.kind==="ball") drawEntity(e);
   drawThrowIn();
   drawCallout(dp);
+  if(S.debug){ drawDebugSelection(); updateDebugPanel(); }
   // annotation overlay + scrub/time
   const kind=S.term.variants[S.vIndex].kind;
   // place the banner at the end AWAY from the goal (goal is at bottom when defending)
@@ -920,6 +968,7 @@ function stepInfo(){
 }
 
 /* ========================================================== UI ============== */
+const debugPanel=document.getElementById('debugPanel');
 const termlist=document.getElementById('termlist');
 const tabsEl=document.getElementById('tabs');
 const descEl=document.getElementById('desc');
@@ -1003,9 +1052,30 @@ function setScrubTicks(){
 
 /* events */
 playBtn.onclick=togglePlay;
-document.getElementById('restart').onclick=()=>{ S.t=0; S.pp=0; S.playing=false; S.seekTarget=null; updatePlayBtn(); render(); };
+document.getElementById('restart').onclick=()=>{ S.t=0; S.pp=0; S.playing=false; S.seekTarget=null; S.debugPos={}; updatePlayBtn(); render(); };
 document.getElementById('prevStage').onclick=prevStage;
 document.getElementById('nextStage').onclick=nextStage;
+
+/* hidden debug mode: Shift+D toggles. When on and paused, drag circles to read/relay positions. */
+function setDebug(on){ S.debug=!!on; stageEl.classList.toggle('debug',S.debug); if(!S.debug){ S.dragging=false; S.debugPos={}; } render(); }
+function entityAtCanvas(cx,cy){
+  const R=Math.max(11,rect.w*0.036), lim=(R*1.4)**2; let best=null,bd=lim;
+  for(const e of S.comp.entities){
+    const p=samplePos(S.comp,e.id,S.t), c=project(p[0],p[1]);
+    const d=(c[0]-cx)**2+(c[1]-cy)**2; if(d<=bd){ bd=d; best=e.id; }
+  }
+  return best;
+}
+cv.addEventListener('pointerdown',e=>{
+  if(!S.debug) return;
+  const id=entityAtCanvas(e.offsetX,e.offsetY);
+  if(id){ S.sel=id; if(!S.playing){ S.dragging=true; try{cv.setPointerCapture(e.pointerId);}catch(_){} } render(); }
+});
+cv.addEventListener('pointermove',e=>{
+  if(!S.debug||!S.dragging) return;
+  S.debugPos[S.sel]=invProject(e.offsetX,e.offsetY); render();
+});
+cv.addEventListener('pointerup',e=>{ if(S.dragging){ S.dragging=false; try{cv.releasePointerCapture(e.pointerId);}catch(_){} } });
 scrub.addEventListener('pointerdown',()=>S.scrubbing=true);
 scrub.addEventListener('pointerup',()=>S.scrubbing=false);
 scrub.addEventListener('input',()=>{ seekFraction(parseFloat(scrub.value)); updatePlayBtn(); render(); });
@@ -1021,7 +1091,8 @@ colThem.addEventListener('input',()=>{ S.colors.them=colThem.value; saveColors()
 
 document.addEventListener('keydown',e=>{
   if(e.target.tagName==="INPUT") return;
-  if(e.code==="Space"){ e.preventDefault(); togglePlay(); }
+  if(e.key==="D"){ e.preventDefault(); setDebug(!S.debug); }      // Shift+D: hidden debug toggle
+  else if(e.code==="Space"){ e.preventDefault(); togglePlay(); }
   else if(e.key==="ArrowRight"){ e.preventDefault(); nextStage(); }
   else if(e.key==="ArrowLeft"){ e.preventDefault(); prevStage(); }
 });
@@ -1043,6 +1114,8 @@ function frame(now){
 window.OVFC = {
   TERMS, get S(){return S;}, compileVariant, samplePos, pauseAt, tick, seekFraction,
   play, pause, nextStage, prevStage, loadVariant, render, stepInfo, playFrac, sampleFace, FOCUS,
+  setDebug, seqNumber, invProject, debugPanelText(){ return debugPanel.textContent; },
+  canvasPointOf(id){ const p=samplePos(S.comp,id,S.t); return project(p[0],p[1]); },
   // drive the clock deterministically without rAF (for tests); honours the auto-cycle model
   step(dt){ tick(dt); render(); },
   // current positions of every entity, plus clock info — what tests assert on
@@ -1066,7 +1139,8 @@ function applyHash(){
   const h=new URLSearchParams(location.hash.slice(1));
   if(h.has('term')){ const t=TERMS.find(x=>x.id===h.get('term')); if(t) selectTerm(t); }
   if(h.has('v')) loadVariant(S.term, parseInt(h.get('v'))||0);
-  if(h.has('t')){ S.t=parseFloat(h.get('t'))||0; render(); }
+  if(h.has('t')){ S.t=parseFloat(h.get('t'))||0; S.pp=tToPp(S.comp,S.t); render(); }
+  if(h.has('debug')) setDebug(true);
   if(h.has('play')) play();
 }
 window.addEventListener('hashchange',applyHash);

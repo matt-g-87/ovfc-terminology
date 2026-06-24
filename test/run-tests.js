@@ -186,6 +186,38 @@ function onPitch(p){ // allow a little slack for the goal/keeper drawn just beyo
     check(hasFace===true, `vision cone: ${id} v${v} ${ent} has a facing target`);
   }
 
+  // 2f) Hidden debug mode: toggle, drag override, inspector panel, sequence number.
+  await b.eval(`(window.OVFC.selectById("half-turn",1), window.OVFC.seekFraction(0), 1)`);
+  check(await b.eval(`document.getElementById('stage').classList.contains('debug')`)===false, 'debug: hidden by default');
+  await b.eval(`(window.OVFC.setDebug(true), 1)`);
+  check(await b.eval(`document.getElementById('stage').classList.contains('debug')`)===true, 'debug: setDebug(true) shows the inspector');
+  // seqNumber: integer on a stage, decimal between stages
+  const seqAtStage = await b.eval(`window.OVFC.seqNumber()`);
+  check(Math.abs(seqAtStage-1)<1e-6, `debug seq: 1 at the first stage (got ${seqAtStage})`);
+  const seqMid = await b.eval(`(function(){ const ps=window.OVFC.S.comp.pauses; window.OVFC.S.t=(ps[0].t+ps[1].t)/2; window.OVFC.render(); return window.OVFC.seqNumber(); })()`);
+  check(seqMid>1 && seqMid<2, `debug seq: decimal between stages 1 and 2 (got ${seqMid.toFixed(2)})`);
+  // drag override → samplePos reflects it and the panel reports id + coords
+  await b.eval(`(window.OVFC.S.sel="a1", window.OVFC.S.debugPos={a1:[0.33,0.44]}, window.OVFC.render(), 1)`);
+  const ov = await b.eval(`window.OVFC.samplePos(window.OVFC.S.comp,"a1",window.OVFC.S.t)`);
+  check(Math.abs(ov[0]-0.33)<1e-9 && Math.abs(ov[1]-0.44)<1e-9, 'debug drag: samplePos returns the dragged position');
+  const panel = await b.eval(`window.OVFC.debugPanelText()`);
+  check(panel.includes("a1") && panel.includes("0.33") && panel.includes("0.44"), 'debug panel: shows selected id + coordinates');
+  // 2g) REAL drag via synthesized mouse input — exercises the actual pointer handlers,
+  //     not just the state (the "play doesn't work" lesson: test the real interaction path).
+  await b.eval(`(window.OVFC.selectById("half-turn",1), window.OVFC.seekFraction(0), window.OVFC.setDebug(true), 1)`);
+  const ri = await b.eval(`(function(){ const r=document.getElementById('cv').getBoundingClientRect(); const p=window.OVFC.canvasPointOf("a1"); return {rx:r.left, ry:r.top, px:p[0], py:p[1]}; })()`);
+  const dx=ri.rx+ri.px, dy=ri.ry+ri.py;
+  await b.send('Input.dispatchMouseEvent',{type:'mousePressed',x:dx,y:dy,button:'left',buttons:1,clickCount:1}, b.session);
+  await b.send('Input.dispatchMouseEvent',{type:'mouseMoved',x:dx-50,y:dy-35,button:'left',buttons:1}, b.session);
+  await b.send('Input.dispatchMouseEvent',{type:'mouseReleased',x:dx-50,y:dy-35,button:'left',buttons:1,clickCount:1}, b.session);
+  const drag = await b.eval(`({sel:window.OVFC.S.sel, moved:!!window.OVFC.S.debugPos.a1})`);
+  check(drag.sel==="a1" && drag.moved, `debug REAL drag: a press+move on a circle selects and repositions it (sel=${drag.sel}, moved=${drag.moved})`);
+
+  // turning debug off clears overrides and hides the panel
+  await b.eval(`(window.OVFC.setDebug(false), 1)`);
+  check(await b.eval(`Object.keys(window.OVFC.S.debugPos).length===0`)===true, 'debug: turning off clears drag overrides');
+  check(await b.eval(`document.getElementById('stage').classList.contains('debug')`)===false, 'debug: off hides the inspector');
+
   // 3) The whole run must be free of page exceptions / console errors.
   check(b.exceptions.length===0,
     b.exceptions.length ? 'NO uncaught exceptions — but found:\n    '+b.exceptions.slice(0,6).join('\n    ')
