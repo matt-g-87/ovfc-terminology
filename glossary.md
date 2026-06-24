@@ -36,3 +36,5 @@ Goal Side - put yourself closer to our goal than the opponent. Protect our goal
 Touch tight - a defender should mark an attacker so closely that there is virtually no space between them
 
 Check in, Check out - make a sharp run toward the ball (checking in) and then quickly pivoting or exploding into space in the opposite direction (checking out)
+
+Drop - When the ball is turned over to the opponent, or a quick throw in by the opponent is about to be taken, mid fielders need to drop into defensive positions fast.
