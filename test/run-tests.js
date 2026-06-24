@@ -225,6 +225,24 @@ function onPitch(p){ // allow a little slack for the goal/keeper drawn just beyo
   check(await b.eval(`Object.keys(window.OVFC.S.debugPos).length===0`)===true, 'debug: turning off clears drag overrides');
   check(await b.eval(`document.getElementById('stage').classList.contains('debug')`)===false, 'debug: off hides the inspector');
 
+  // 2h) Mobile LANDSCAPE: two-column layout gives the pitch a full-height right column.
+  await b.send('Emulation.setDeviceMetricsOverride',{width:844,height:390,deviceScaleFactor:2,mobile:true},b.session);
+  await b.eval(`(window.OVFC.selectById("touch-tight"), 1)`);
+  await new Promise(r=>setTimeout(r,250));
+  const land = await b.eval(`(function(){
+    const st=document.getElementById('stage').getBoundingClientRect();
+    const body=document.querySelector('.body').getBoundingClientRect();
+    return { iw:innerWidth, ih:innerHeight, overflow: document.documentElement.scrollWidth>innerWidth+1,
+      stageRight:Math.round(st.right), stageW:Math.round(st.width), stageH:Math.round(st.height),
+      bodyH:Math.round(body.height), wFrac:+(st.width/innerWidth).toFixed(2), hFrac:+(st.height/body.height).toFixed(2),
+      dropdownShown: getComputedStyle(document.getElementById('termSelect')).display!=='none' }; })()`);
+  check(!land.overflow, `landscape: no horizontal overflow (iw=${land.iw})`);
+  check(land.wFrac>=0.40 && land.wFrac<=0.50, `landscape: pitch occupies ~40-50% width (got ${land.wFrac})`);
+  check(land.stageRight >= land.iw-12, `landscape: pitch is in the right column (right edge ${land.stageRight}≈${land.iw})`);
+  check(land.hFrac>=0.6, `landscape: pitch is tall, not collapsed (h/bodyH=${land.hFrac})`);
+  check(land.dropdownShown===true, `landscape: term dropdown is shown`);
+  await b.send('Emulation.clearDeviceMetricsOverride',{},b.session);
+
   // 3) The whole run must be free of page exceptions / console errors.
   check(b.exceptions.length===0,
     b.exceptions.length ? 'NO uncaught exceptions — but found:\n    '+b.exceptions.slice(0,6).join('\n    ')

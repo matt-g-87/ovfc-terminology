@@ -104,7 +104,7 @@
 
   /* mobile: dropdown term picker + deterministic row heights so the pitch never resizes
      between terms (its box is the leftover space, so the other rows must be constant) */
-  @media (max-width:780px){
+  @media (max-width:780px), (orientation:landscape) and (max-height:560px){
     .body{grid-template-columns:1fr;grid-template-rows:auto 1fr}
     .sidebar{border-right:none;border-bottom:1px solid var(--line);overflow:visible;padding:8px 10px}
     #termlist,.search{display:none}        /* hide the desktop list + search on phone */
@@ -130,6 +130,20 @@
   @media (max-width:480px){
     .time{min-width:0}
     header .teamcolors .cap{display:none}
+  }
+  /* mobile LANDSCAPE: short viewport → two columns, pitch gets a full-height right column */
+  @media (orientation:landscape) and (max-height:560px){
+    .body{display:grid;grid-template-columns:1fr 46%;
+      grid-template-rows:auto auto auto auto 1fr;
+      grid-template-areas:"side stage" "def stage" "tabs stage" "ctrl stage" "desc stage";}
+    .content{display:contents}            /* promote its children into .body's grid */
+    .sidebar{grid-area:side;border-bottom:none;padding:6px 10px}
+    .def{grid-area:def;border-bottom:none;padding:4px 12px}
+    .tabs{grid-area:tabs;padding-top:4px}
+    .controls{grid-area:ctrl}
+    .desc{grid-area:desc;height:auto;max-height:none;overflow:auto}   /* fills remaining + scrolls */
+    .stage{grid-area:stage;margin:6px 6px 6px 0;min-height:0}
+    header{padding:6px 12px}              /* slim header → more height for the pitch */
   }
 </style>
 </head>
