@@ -622,15 +622,15 @@ const TERMS = [
       keyframes:[
         {t:0,pos:{gk:G(.5,.06),d1:G(.5,.55),ball:G(.5,.57),a1:G(.56,.50),d2:G(.35,.60),a2:G(.66,.55)}},
         {t:1.2,pos:{a1:G(.52,.55),ball:G(.53,.55),d1:G(.5,.56)}},
-        {t:2.2,pos:{d1:G(.52,.54),d2:G(.45,.62)}},
-        {t:3.2,pos:{ball:G(.5,.57),d1:G(.5,.56)}},
-        {t:4.2,pos:{d2:G(.62,.46),ball:G(.60,.47)}}],
+        {t:2.2,pos:{d1:G(.52,.54),d2:G(.51,.41)}},
+        {t:3.2,pos:{ball:G(.5,.56),d1:G(.5,.55)}},
+        {t:4.4,pos:{d1:G(.5,.68),ball:G(.5,.70),d2:G(.29,.54),a1:G(.52,.55)}}],
       pauses:[
         {t:0,text:"YOU are on the ball — under pressure.",point:"d1"},
         {t:1.2,text:"They take it off you — coach yells: HUNT!",point:"a1"},
-        {t:2.2,text:"YOU go straight back at it; your teammate COVERS behind.",point:"d1",shapes:[{type:"run",from:G(.5,.56),to:G(.52,.54)},{type:"space",at:"d2",r:.09}]},
+        {t:2.2,text:"YOU go straight back at it; your teammate COVERS goal-side.",point:"d1",shapes:[{type:"run",from:G(.5,.56),to:G(.52,.54)},{type:"space",at:"d2",r:.09}]},
         {t:3.2,text:"Pressure wins it back.",point:"d1"},
-        {t:4.2,text:"Now in possession, the cover breaks into an open lane.",point:"d2",shapes:[{type:"lane",from:"d1",to:"d2"}]}] }
+        {t:4.4,text:"YOU break free upfield; the cover breaks into an open lane ahead.",point:"d1",shapes:[{type:"run",from:G(.5,.55),to:G(.5,.68)},{type:"lane",from:"d1",to:"d2"}]}] }
   ]
 },
 {
@@ -676,9 +676,9 @@ const TERMS = [
     { kind:"INCORRECT", title:"Flat and static",
       desc:"The ball is switched but the line stays flat and central, leaving the far side free to attack.",
       entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"d1",team:"blue"},{id:"d2",team:"blue"},{id:"d3",team:"blue"},
-        {id:"a1",team:"red"},{id:"a2",team:"red"},{id:"ball",kind:"ball"}],
+        {id:"a1",team:"red"},{id:"a2",team:"red"},{id:"a3",team:"red"},{id:"ball",kind:"ball"}],
       keyframes:[
-        {t:0,pos:{gk:G(.5,.06),d1:G(.50,.30),d2:G(.62,.30),d3:G(.74,.30),a1:G(.78,.55),ball:G(.78,.57),a2:G(.20,.50)}},
+        {t:0,pos:{gk:G(.5,.06),d1:G(.50,.30),d2:G(.62,.30),d3:G(.74,.30),a1:G(.78,.55),ball:G(.78,.57),a2:G(.20,.50),a3:G(.49,.62)}},
         {t:1.4,pos:{ball:G(.50,.52)},ease:"linear"},
         {t:2.6,pos:{ball:G(.20,.50),a2:G(.20,.50),d1:G(.35,.40),d2:G(.58,.22)}},
         {t:3.6,pos:{a2:G(.20,.28),ball:G(.20,.30)}}],
@@ -690,9 +690,9 @@ const TERMS = [
     { kind:"CORRECT", title:"Shift across",
       desc:"As the ball travels the whole line slides across together, staying compact and ball-oriented; the far side is covered.",
       entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"d1",team:"blue"},{id:"d2",team:"blue"},{id:"d3",team:"blue"},
-        {id:"a1",team:"red"},{id:"a2",team:"red"},{id:"ball",kind:"ball"}],
+        {id:"a1",team:"red"},{id:"a2",team:"red"},{id:"a3",team:"red"},{id:"ball",kind:"ball"}],
       keyframes:[
-        {t:0,pos:{gk:G(.5,.06),d1:G(.50,.30),d2:G(.62,.30),d3:G(.74,.30),a1:G(.78,.55),ball:G(.78,.57),a2:G(.20,.50)}},
+        {t:0,pos:{gk:G(.5,.06),d1:G(.50,.30),d2:G(.62,.30),d3:G(.74,.30),a1:G(.78,.55),ball:G(.78,.57),a2:G(.20,.50),a3:G(.49,.62)}},
         {t:1.4,pos:{ball:G(.50,.52),d1:G(.22,.30),d2:G(.37,.30),d3:G(.52,.30)},ease:"linear"},
         {t:2.6,pos:{ball:G(.20,.50),a2:G(.20,.50),d1:G(.20,.36)}},
         {t:3.6,pos:{ball:G(.32,.55),a2:G(.24,.50)}}],
@@ -708,34 +708,36 @@ const TERMS = [
   def:"On a turnover or quick opponent throw, midfielders drop into defensive positions fast.",
   orientation:"defending", pitch:"two-thirds",
   variants:[
-    { kind:"INCORRECT", title:"Caught high",
-      desc:"After the turnover our midfielders stay high and ball-watch, so the opponent breaks straight through the vacated middle.",
+    { kind:"INCORRECT", title:"Jogging back",
+      desc:"On a 2 v 1 break the midfielders only half-sprint back; the lone defender must commit to the ball, leaving a wide-open pass and finish.",
       entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"d1",team:"blue"},{id:"m1",team:"blue"},{id:"m2",team:"blue"},
         {id:"a1",team:"red"},{id:"a2",team:"red"},{id:"ball",kind:"ball"}],
       keyframes:[
-        {t:0,pos:{gk:G(.5,.06),d1:G(.5,.24),m1:G(.40,.62),m2:G(.60,.62),a1:G(.5,.70),ball:G(.5,.72),a2:G(.30,.60)}},
-        {t:1.4,pos:{a1:G(.5,.52),ball:G(.5,.54)}},
-        {t:2.6,pos:{a1:G(.5,.38),ball:G(.5,.40)}},
-        {t:3.6,pos:{a1:G(.5,.20),ball:G(.5,.22)}}],
+        {t:0,pos:{gk:G(.5,.06),d1:G(.50,.32),m1:G(.40,.78),m2:G(.60,.78),a1:G(.42,.55),ball:G(.42,.57),a2:G(.60,.55)}},
+        {t:1.5,pos:{a1:G(.42,.42),ball:G(.42,.44),a2:G(.60,.42),m1:G(.40,.71),m2:G(.60,.71)}},
+        {t:3.0,pos:{a1:G(.44,.28),ball:G(.44,.30),a2:G(.60,.28),d1:G(.46,.26),m1:G(.40,.62),m2:G(.60,.62)}},
+        {t:4.0,pos:{ball:G(.60,.30),a2:G(.60,.28)},ease:"linear"},
+        {t:5.0,pos:{a2:G(.58,.10),ball:G(.56,.02)},ease:"linear"}],
       pauses:[
-        {t:0,text:"Turnover — they're about to attack fast.",point:"m1"},
-        {t:1.4,text:"Our midfielders stay high and ball-watch.",point:"m1",shapes:[{type:"space",at:G(.5,.45),r:.12}]},
-        {t:2.6,text:"The middle is wide open — they break through it.",point:"a1"},
-        {t:3.6,text:"On goal before we recover.",point:"a1"}] },
-    { kind:"CORRECT", title:"Drop in fast",
-      desc:"On the trigger the midfielders sprint back into defensive positions; the block re-forms compact and the attack is contained.",
+        {t:0,text:"2 v 1 break — only one defender back, the midfielders trailing.",point:"d1",shapes:[{type:"lane",from:"a1",to:"a2"}]},
+        {t:1.5,text:"The midfielders jog back at half pace — falling behind.",point:"m1",shapes:[{type:"run",from:G(.40,.78),to:G(.40,.71)}]},
+        {t:3.0,text:"The lone defender must commit to the ball-carrier.",point:"d1"},
+        {t:4.0,text:"A simple pass to the wide-open second attacker.",point:"a2",shapes:[{type:"lane",from:"a1",to:"a2"}]},
+        {t:5.0,text:"Unopposed finish. Goal.",point:"a2"}] },
+    { kind:"CORRECT", title:"Sprint back",
+      desc:"On a 2 v 1 break the midfielders sprint back stride-for-stride with the attackers; once D1 delays the ball, they recover to block the passing lanes.",
       entities:[{id:"gk",team:"blue",label:"GK",role:"keeper"},{id:"d1",team:"blue"},{id:"m1",team:"blue"},{id:"m2",team:"blue"},
         {id:"a1",team:"red"},{id:"a2",team:"red"},{id:"ball",kind:"ball"}],
       keyframes:[
-        {t:0,pos:{gk:G(.5,.06),d1:G(.5,.24),m1:G(.40,.62),m2:G(.60,.62),a1:G(.5,.70),ball:G(.5,.72),a2:G(.30,.60)}},
-        {t:1.2,pos:{m1:G(.44,.46),m2:G(.56,.46)}},
-        {t:2.4,pos:{m1:G(.45,.36),m2:G(.55,.36),a1:G(.5,.62),ball:G(.5,.64)}},
-        {t:3.6,pos:{ball:G(.34,.66),a1:G(.40,.62)}}],
+        {t:0,pos:{gk:G(.5,.06),d1:G(.50,.32),m1:G(.40,.78),m2:G(.60,.78),a1:G(.42,.55),ball:G(.42,.57),a2:G(.60,.55)}},
+        {t:1.5,pos:{a1:G(.42,.42),ball:G(.42,.44),a2:G(.60,.42),m1:G(.40,.62),m2:G(.60,.62)}},
+        {t:3.0,pos:{a1:G(.44,.36),ball:G(.44,.38),a2:G(.60,.36),d1:G(.46,.32),m1:G(.42,.46),m2:G(.58,.46)}},
+        {t:4.2,pos:{m1:G(.52,.38),m2:G(.60,.42)}}],
       pauses:[
-        {t:0,text:"Turnover — they're about to attack fast.",point:"m1"},
-        {t:1.2,text:"DROP — midfielders sprint back into defensive positions.",point:"m1",shapes:[{type:"run",from:G(.40,.62),to:G(.44,.46)}]},
-        {t:2.4,text:"The block re-forms, compact in front of the defense.",point:"m1"},
-        {t:3.6,text:"No way through; the attack is forced wide and contained.",point:"a1"}] }
+        {t:0,text:"2 v 1 break — only one defender back, the midfielders trailing.",point:"d1",shapes:[{type:"lane",from:"a1",to:"a2"}]},
+        {t:1.5,text:"DROP at full sprint — matching the attackers stride for stride.",point:"m1",shapes:[{type:"run",from:G(.40,.78),to:G(.40,.62)}]},
+        {t:3.0,text:"D1 delays the ball-carrier, buying time; the midfielders catch up.",point:"d1"},
+        {t:4.2,text:"They get back to block the passing lanes — the overload is beaten.",point:"m1",shapes:[{type:"lane",from:"a1",to:"a2"}]}] }
   ]
 },
 /* ============================== PHASE 12 — POSSESSION & BUILD-UP ============================== */
@@ -1381,7 +1383,7 @@ function readableOn(hex){ const c=hex.replace('#',''); const r=parseInt(c.slice(
    stage and park. dwellBase is test-overridable (0 ⇒ pp==t, linear). */
 const EPS = 0.001;
 const S = { term:null, vIndex:0, comp:null, t:0, pp:0, playing:false, speed:1, scrubbing:false,
-  lastNow:null, colors:loadColors(), dwellBase:8, seekTarget:null,
+  lastNow:null, colors:loadColors(), dwellBase:6, seekTarget:null,
   debug:false, sel:null, debugPos:{}, dragging:false };
 
 function buildPP(comp){               // build the pp segment map using the current dwellBase
