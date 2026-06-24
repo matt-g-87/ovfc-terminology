@@ -1423,7 +1423,7 @@ function play(){
   S.seekTarget=null;
   const seg=segAt(S.comp,S.pp);                // if parked on a dwell, skip its hold so we move now
   if(seg.type==='dwell') S.pp=seg.pp1;
-  S.t=ppToT(S.comp,S.pp); S.playing=true; updatePlayBtn();
+  S.t=ppToT(S.comp,S.pp); S.playing=true; updatePlayBtn(); startLoop();
 }
 function pause(){ S.playing=false; S.seekTarget=null; updatePlayBtn(); }
 function togglePlay(){ S.playing?pause():play(); }
@@ -1452,14 +1452,14 @@ function nextStage(){          // animate forward to the next stage, then park
   S.debugPos={};
   const p=S.comp.pauses.find(p=>p.t>S.t+EPS);
   S.seekTarget = p ? p.t : S.comp.duration;
-  S.playing=true; updatePlayBtn();
+  S.playing=true; updatePlayBtn(); startLoop();
 }
 function prevStage(){          // animate back to the previous stage, then park
   if(!S.comp) return;
   S.debugPos={};
   let target=0;
   for(const p of S.comp.pauses){ if(p.t<S.t-EPS) target=p.t; else break; }
-  S.seekTarget=target; S.playing=true; updatePlayBtn();
+  S.seekTarget=target; S.playing=true; updatePlayBtn(); startLoop();
 }
 // sequence number with decimal between stages (1, 1.4, 2, …) for the debug panel
 function seqNumber(){
@@ -1826,13 +1826,19 @@ document.addEventListener('keydown',e=>{
 new ResizeObserver(resize).observe(stageEl);
 window.addEventListener('resize',resize);
 
+// The rAF loop runs ONLY while the clock is moving (playing / dwelling / Forward-Back glide).
+// When idle it stops, so a paused pitch costs ~0 CPU. One-off redraws (scrub, pickers, debug
+// drag, resize, term/variant change) call render() directly — they don't need the loop.
+let rafId=null;
+function startLoop(){ if(rafId==null){ S.lastNow=null; rafId=requestAnimationFrame(frame); } }
 function frame(now){
   if(S.lastNow==null) S.lastNow=now;
   let dt=(now-S.lastNow)/1000; S.lastNow=now;
   dt=Math.min(dt,0.05);
   tick(dt);
   render();
-  requestAnimationFrame(frame);
+  if(S.playing){ rafId=requestAnimationFrame(frame); }   // keep going while moving
+  else { rafId=null; S.lastNow=null; }                    // idle → stop the loop
 }
 
 /* ---- test/debug surface: expose the engine so the headless harness can drive it,
@@ -1879,8 +1885,7 @@ buildTermList();
 buildTermSelect();
 selectTerm(TERMS[0]);
 resize();
-applyHash();
-requestAnimationFrame(frame);
+applyHash();   // renders the initial frame; the rAF loop starts on demand (play / step)
 </script>
 </body>
 </html>

@@ -51,7 +51,9 @@ function onPitch(p){ // allow a little slack for the goal/keeper drawn just beyo
       const dur = await b.eval(`window.OVFC.S.comp.duration`);
       const label = `${t.id} v${v}`;
 
-      await b.eval(`(window.OVFC.play(), 1)`);
+      // drive deterministically via step() only — set the flag directly so we don't also
+      // start the real rAF loop (which would race the manual stepping).
+      await b.eval(`(window.OVFC.S.playing=true, 1)`);
       const steps = Math.ceil((dur+1.0)/0.05) + 10;
       let sawPause = false, badPos = null, overran = false;
       for(let i=0;i<steps;i++){
