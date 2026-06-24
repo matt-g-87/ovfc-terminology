@@ -92,11 +92,9 @@
   .btn:hover{background:#2a2820}
   .scrubwrap{flex:1 1 220px;display:flex;align-items:center;gap:8px;min-width:160px}
   .time{font-variant-numeric:tabular-nums;color:var(--muted);font-size:12px;flex:0 0 auto;min-width:74px;text-align:right}
-  .speed{display:flex;align-items:center;gap:8px;flex:0 0 auto;color:var(--muted);font-size:13px}
   input[type=range]{-webkit-appearance:none;appearance:none;height:6px;border-radius:6px;
     background:#34302a;outline:none;cursor:pointer}
   input[type=range].scrub{flex:1}
-  input[type=range].spd{width:118px}
   input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;
     background:var(--accent);border:2px solid #0c161f;box-shadow:0 1px 4px rgba(0,0,0,.5)}
   input[type=range]::-moz-range-thumb{width:18px;height:18px;border:2px solid #0c161f;border-radius:50%;background:var(--accent)}
@@ -124,11 +122,12 @@
       white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .tab .vttl{display:none}                 /* hide the "— title" suffix; keep short kind label */
     .stage{margin:6px 6px 0}                 /* tighter margins → wider/taller pitch */
-    .controls{padding:9px 12px;gap:10px}
+    /* centre the playback buttons; scrub drops to its own full-width row below */
+    .controls{padding:9px 12px;gap:10px;flex-wrap:wrap;justify-content:center}
+    .scrubwrap{flex-basis:100%;order:1}
     .desc{padding:8px 14px 12px;height:74px;max-height:none}     /* fixed height → stable stage */
   }
   @media (max-width:480px){
-    .speed .lbl{display:none}
     .time{min-width:0}
     header .teamcolors .cap{display:none}
   }
@@ -172,11 +171,6 @@
         <div class="scrubwrap">
           <input type="range" class="scrub" id="scrub" min="0" max="1" step="0.001" value="0">
           <span class="time" id="time">0.0 / 0.0s</span>
-        </div>
-        <div class="speed">
-          <span class="lbl">Speed</span>
-          <input type="range" class="spd" id="speed" min="0.25" max="2" step="0.05" value="1">
-          <span id="speedVal" style="min-width:34px">1.0×</span>
         </div>
       </div>
       <div class="desc" id="desc"></div>
@@ -989,8 +983,6 @@ const defEl=document.getElementById('termDef');
 const playBtn=document.getElementById('play');
 const scrub=document.getElementById('scrub');
 const timeEl=document.getElementById('time');
-const speed=document.getElementById('speed');
-const speedVal=document.getElementById('speedVal');
 const search=document.getElementById('search');
 const termSelect=document.getElementById('termSelect');
 const GROUP_ORDER=["Defending","Attacking"];
@@ -1102,7 +1094,6 @@ scrub.addEventListener('pointerdown',()=>S.scrubbing=true);
 scrub.addEventListener('pointerup',()=>S.scrubbing=false);
 scrub.addEventListener('input',()=>{ seekFraction(parseFloat(scrub.value)); updatePlayBtn(); render(); });
 scrub.addEventListener('change',()=>{ S.scrubbing=false; });
-speed.addEventListener('input',()=>{ S.speed=parseFloat(speed.value); speedVal.textContent=S.speed.toFixed(2).replace(/0$/,'')+"×"; });
 search.addEventListener('input',()=>buildTermList(search.value));
 
 /* team-colour pickers */
@@ -1175,7 +1166,6 @@ buildTermList();
 buildTermSelect();
 selectTerm(TERMS[0]);
 resize();
-speedVal.textContent="1×";
 applyHash();
 requestAnimationFrame(frame);
 </script>
