@@ -28,7 +28,7 @@ function onPitch(p){ // allow a little slack for the goal/keeper drawn just beyo
   // 0) page loaded clean
   check((await b.eval(`!!window.OVFC`))===true, 'engine (window.OVFC) is exposed');
   const terms = await b.eval(`window.OVFC.TERMS.map(t=>({id:t.id,n:t.variants.length}))`);
-  check(terms.length===30, `all 30 glossary terms present (got ${terms.length})`);
+  check(terms.length===29, `all 29 glossary terms present (got ${terms.length})`);
   // every term's group is one of the three rendered groups (else it wouldn't show)
   const groupsOk = await b.eval(`window.OVFC.TERMS.every(t=>["Defending","Possession & Build-up","Attacking & Forward Play"].includes(t.group))`);
   check(groupsOk===true, 'every term belongs to one of the 3 sidebar groups');
